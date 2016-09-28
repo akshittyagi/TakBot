@@ -4,6 +4,7 @@
 #include <vector>
 #include <ctype.h>
 using namespace std;
+
 //Debugger functions 
 void split(const string &s, char delim, vector<string> &elems) {
     stringstream ss;
@@ -36,7 +37,7 @@ class Game{
 	int noOfMoves;
 	vector<Player> listOfPlayers;
 	GameState state;
-	
+
 public:
 	
 	class Player{
