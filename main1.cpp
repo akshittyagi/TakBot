@@ -50,7 +50,9 @@ public:
 
 	vector<Player> listOfPlayers;
 
-	Board();
+	Board(){
+
+	}
 	Board(int n){
 		this->dimension = n;
 		//Default as 5*5
@@ -60,6 +62,7 @@ public:
 		for(int i=0;i<dimension;i++)
 			board[i] = new vector<string>[dimension];
 	}
+
 	// Board(Board &b){
 	// 	this->dimension = b.dimension;
 	// 	this->listOfPlayers = NULL;
@@ -70,8 +73,19 @@ public:
 	int squareToNum(string sqStr);
 	vector<string> getValidMoves(int currentPiece);
 	int evaluate();
+	void setDimension(int n);
 };
 
+void Board::setDimension(int n)
+{
+		this->dimension = n;
+		//Default as 5*5
+		listOfPlayers.push_back(Player(21,1));
+		listOfPlayers.push_back(Player(21,1)); 
+		board = new vector<string>*[dimension];
+		for(int i=0;i<dimension;i++)
+			board[i] = new vector<string>[dimension];
+}
 int Board::squareToNum(string sqStr)
 {
 	if(sqStr.length()!=2)
@@ -353,7 +367,10 @@ class Game{
 	Board board;
 
 public:
-	Game();
+	Game()
+	{
+
+	}
 	Game(int n)
 	{
 		this->dimension = n;
@@ -364,13 +381,25 @@ public:
 		this->maxDown = 1;
 		this->maxRight = char(int('a'+n-1));
 		this->noOfMoves = 0;
-		this->board = Board(this->dimension);
+		this->board.setDimension(this->dimension);
 	}
 
 	string getBestMove();
 	void makeMove(string move);
+	void setDim(int n);
 };
-
+void Game::setDim(int n)
+{
+	this->dimension = n;
+		this->totSquares = n*n;
+		this->currTurnNo = 0;
+		this->maxNoOfMovablePieces = this->dimension;
+		this->maxUp = this->dimension;
+		this->maxDown = 1;
+		this->maxRight = char(int('a'+n-1));
+		this->noOfMoves = 0;
+		this->board.setDimension(this->dimension);
+}
 string Game::getBestMove(){
 	int currentPiece;
 	if(this->currTurnNo==0)
@@ -411,7 +440,7 @@ class AIPlayer{
 	Game game;
 	
     public:
-		AIPlayer()
+		AIPlayer(string start)
 		{
 			//TODO:Initialize the params 
 			
@@ -423,7 +452,7 @@ class AIPlayer{
 			this->playerNo = atoi(elems[0].c_str())-1;
 			this->sizeOfBoard = atoi(elems[1].c_str());
 			this->timeLeft = atoi(elems[2].c_str());
-			game = Game(this->sizeOfBoard);
+			this->game.setDim(this->sizeOfBoard);
 			this->Play();
 		}
 		void Play();
@@ -453,5 +482,5 @@ void AIPlayer::Play()
 int main()
 {
 	//Default constructor called(unparam)
-	AIPlayer aiPlayer();
+	AIPlayer aiPlayer("start");
 }
