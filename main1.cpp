@@ -38,9 +38,9 @@ public:
 	//vector<string> board[dimension];
 	vector<string> **board;
 	class Player{
+	public:	
 		int flatStones;
 		int capStones;
-	public:
 		Player(int flats,int caps)
 		{
 			this->flatStones = flats;
@@ -67,7 +67,7 @@ public:
 	// }
 
 	void makeMove(int playerNo, string move);
-	int squareToNum(vector<string> sqStr,int start,int end);
+	int squareToNum(string sqStr);
 	vector<string> getValidMoves(int currentPiece);
 	int evaluate();
 };
@@ -81,7 +81,7 @@ int Board::squareToNum(string sqStr)
 
 	int row = int(sqStr[0]) - 96;
 	int col = int(sqStr[1]);
-	if(row<1 or row>this->dimension or col<1 or col>this.dimension)
+	if(row<1 or row>this->dimension or col<1 or col>this->dimension)
 		return -1;
 
 	return 1;
@@ -128,23 +128,23 @@ void Board::makeMove(int currentPiece, string move)
 		char direction = move[3];
 		int change;
 		if(direction=='+')
-			change = this->dimension;
+			change = 1;
 		else if(direction=='-')
-			change = -1*this->dimension
+			change = -1;
 		else if(direction=='>')
-			change = 1
+			change = 1;
 		else if(direction=='<')
-			change = -1
+			change = -1;
 		int prevSquare = this->dimension * (col - 1) + (row - 1);
 		for(int i = 4;i<move.length();i++)
 		{
 			int nextCount = int(move[i]);
 			int nextSquare = prevSquare + change;
-			int currRow = (nextSquare%dimension==0?nextSquare/dimension-1;nextSquare/dimension);
+			int currRow = (nextSquare%dimension==0?nextSquare/dimension-1:nextSquare/dimension);
 			int currCol = (nextSquare%dimension==0?nextSquare/dimension-1:nextSquare%dimension-1);
 			int lastIndex = this->board[currRow][currCol].size()-1;
 			if( (this->board[currRow][currCol].size() >  0) and (this->board[currRow][currCol][lastIndex][1]=='S'))
-				this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+""+'F'+" ";
+				this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+""+"F"+" ";
 				//Pull out from top of vector , till top-nextCount
 			vector<string> initVec = this->board[row][col];
 			vector<string> toAdd;
@@ -163,7 +163,7 @@ void Board::makeMove(int currentPiece, string move)
 					this->board[currRow][currCol].push_back(temp);
 			}
 			
-			prevSquare = nextSquare
+			prevSquare = nextSquare;
 			count -= nextCount;
 		}	
 		count = int(move[0]);
