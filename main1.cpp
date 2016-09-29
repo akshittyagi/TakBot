@@ -38,7 +38,7 @@ public:
 	//vector<string> board[dimension];
 	vector<string> **board;
 	class Player{
-	public:	
+	public:
 		int flatStones;
 		int capStones;
 		Player(int flats,int caps)
@@ -105,12 +105,16 @@ void Board::makeMove(int currentPiece, string move)
 		int col = int(move.substr(1)[1])-1; 
 		if(move[0]=='F' or move[0]=='S')
 		{
-			this->board[row][col].push_back(char(currentPiece+0)+""+move[0]+" ");
+			string s;
+			s = char(currentPiece+0)+' '+move[0];
+			this->board[row][col].push_back(s);
 			this->listOfPlayers[currentPiece].flatStones-=1;
  		}
  		else if(move[0]=='C')
  		{
- 			this->board[row][col].push_back(char(currentPiece+0)+""+move[0]+" ");
+ 			string s;
+ 			s = char(currentPiece+0)+' '+move[0];
+ 			this->board[row][col].push_back(s);
  			this->listOfPlayers[currentPiece].flatStones -= 1;
  		}
 	}
@@ -128,9 +132,9 @@ void Board::makeMove(int currentPiece, string move)
 		char direction = move[3];
 		int change;
 		if(direction=='+')
-			change = 1;
+			change = this->dimension;
 		else if(direction=='-')
-			change = -1;
+			change = -1*this->dimension;
 		else if(direction=='>')
 			change = 1;
 		else if(direction=='<')
@@ -144,29 +148,30 @@ void Board::makeMove(int currentPiece, string move)
 			int currCol = (nextSquare%dimension==0?nextSquare/dimension-1:nextSquare%dimension-1);
 			int lastIndex = this->board[currRow][currCol].size()-1;
 			if( (this->board[currRow][currCol].size() >  0) and (this->board[currRow][currCol][lastIndex][1]=='S'))
-				this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+""+"F"+" ";
-				//Pull out from top of vector , till top-nextCount
+				this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+' '+'F';
+				//Pull out from top of vect	or , till top-nextCount
 			vector<string> initVec = this->board[row][col];
 			vector<string> toAdd;
 			int size = initVec.size()-1;
-			for(int j = size;j>size-nextCount;j--)
+			for(int j = size-count;j<size-count+nextCount;j++)
 			{
-					string last = initVec[initVec.size()-1];
-					initVec.pop_back();
-					toAdd.push_back(last);
+				toAdd.push_back(initVec[j]);
 			}
-			int size2 = toAdd.size();
-			for(int j=0;j<size2;j++)
-			{
-					string temp = toAdd[toAdd.size()-1];
-					toAdd.pop_back();
-					this->board[currRow][currCol].push_back(temp);
-			}
-			
-			prevSquare = nextSquare;
+
+			if(this->board[currRow][currCol].size()!=0)
+				this->board[currRow][currCol].insert(this->board[currRow][currCol].end(),toAdd.begin(),toAdd.end());
+			else
+				this->board[currRow][currCol] = toAdd;
+
+			prevSquare = nextSquare;	
 			count -= nextCount;
 		}	
 		count = int(move[0]);
+		int i = count;
+		while(i--)
+		{
+			this->board[row][col].pop_back();
+		}
 		//this->board[row][col] = this->board[row][col][:-count];
 	}
 }
@@ -225,6 +230,14 @@ int Board::evaluate()
 {
 	return 1;
 }
+
+// void print(vector elems)
+// {
+// 	for(int i=0;i<elems.size();i++)
+// 		cerr << elems[i]<<" ";
+
+// 	cerr<<endl;
+// }
 
 struct Node
 {
@@ -401,6 +414,7 @@ class AIPlayer{
 		AIPlayer()
 		{
 			//TODO:Initialize the params 
+			
 			string data;
 			cin >> data;
 			vector<string> elems;
@@ -409,7 +423,7 @@ class AIPlayer{
 			this->playerNo = atoi(elems[0].c_str())-1;
 			this->sizeOfBoard = atoi(elems[1].c_str());
 			this->timeLeft = atoi(elems[2].c_str());
-			this->game = Game(this->sizeOfBoard);
+			game = Game(this->sizeOfBoard);
 			this->Play();
 		}
 		void Play();
@@ -439,5 +453,5 @@ void AIPlayer::Play()
 int main()
 {
 	//Default constructor called(unparam)
-	AIPlayer aiPlayer;
+	AIPlayer aiPlayer();
 }
