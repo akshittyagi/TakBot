@@ -184,42 +184,53 @@ void Board::makeMove(int currentPiece, string move)
 		-> Update the board the of this.Game object
 		-> Update the GameState
 	*/
-	cout<<"Move selected: "<<move<<endl;
+	cerr<<"Move selected: "<<move<<endl;
 	if(isalpha(move[0]))
 	{
 		int isPossible = this->squareToNum(move.substr(1));
 		if(isPossible==-1)
 		{
-			cout<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
+			cerr<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
 		int row = int(move.substr(1)[1])-49; 
-		cout<<"Computed Row: "<<row<<" Computed Col: "<<col<<endl;
+		cerr<<"Computed Row: "<<row<<" Computed Col: "<<col<<endl;
 		if(move[0]=='F' or move[0]=='S')
 		{
 			string s="";
-			s += char(currentPiece+49)+" "+move[0];
-			cout<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
+			s += char(currentPiece+49);
+			cerr<<"S:"<<s<<endl;
+			s += " ";
+			cerr<<"S:"<<s<<endl;
+			s += move[0];
+			cerr<<"S:"<<s<<endl;
+			cerr<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
 			this->board[row][col].push_back(s);
 			this->listOfPlayers[currentPiece].flatStones-=1;
  		}
  		else if(move[0]=='C')
  		{
  			string s="";
- 			s += char(currentPiece+49)+" "+move[0];
- 			this->board[row][col].push_back(s);
- 			cout<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
+			s += char(currentPiece+49);
+			cerr<<"S:"<<s<<endl;
+			s += " ";
+			cerr<<"S:"<<s<<endl;
+			s += move[0];
+			cerr<<"S:"<<s<<endl;
+			cerr<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
+			this->board[row][col].push_back(s);
+ 			cerr<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
  			this->listOfPlayers[currentPiece].flatStones -= 1;
  		}
 	}
 	else if(isdigit(move[0]))
 	{
-		int count = int(move[0]);
+		int count = int(move[0])-48;
 		int isPossible = this->squareToNum(move.substr(1,2));
 		if(isPossible==-1)
 		{
-			cout<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
+			cerr<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
@@ -237,47 +248,48 @@ void Board::makeMove(int currentPiece, string move)
 		int prevSquare = col + this->dimension*(row) + 1;
 		for(int i = 4;i<move.length();i++)
 		{
-			int nextCount = int(move[i]);
+			int nextCount = int(move[i])-48;
 			int nextSquare = prevSquare + change;
-			cout<<"prevSquare: "<<prevSquare<<" NextSquare: "<<nextSquare<<" Change: "<<change<<endl;
+			cerr<<"prevSquare: "<<prevSquare<<" NextSquare: "<<nextSquare<<" Change: "<<change<<endl;
 			int currRow = (nextSquare%dimension==0?nextSquare/dimension-1:nextSquare/dimension);
 			int currCol = (nextSquare%dimension==0?dimension-1:nextSquare%dimension-1);
-			cout<<"currRow: "<<currRow<<" currCol: "<<currCol<<endl;
+			cerr<<"currRow: "<<currRow<<" currCol: "<<currCol<<endl;
 			int lastIndex = this->board[currRow][currCol].size()-1;
-			cout<<"lastIndex: "<<lastIndex<<endl;
+			cerr<<"lastIndex: "<<lastIndex<<endl;
 			if( (this->board[currRow][currCol].size() >  0) and (this->board[currRow][currCol][lastIndex][1]=='S'))
 				this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+' '+'F';
 				//Pull out from top of vect	or , till top-nextCount
-			cout<<"I am here"<<endl;
+			cerr<<"I am here"<<endl;
 			vector<string> initVec = this->board[row][col];
 			vector<string> toAdd;
-			int size = initVec.size()-1;
-			cout<<"initVec size "<<size+1<<endl;
-			cout<<"count: "<<count<<" size: "<<size<<endl;
-			cout<<"initVec: ";
+			int size = initVec.size();
+			cerr<<"initVec size "<<size<<endl;
+			cerr<<"count: "<<count<<" size: "<<size<<endl;
+			cerr<<"initVec: ";
 			print(initVec);
 			for(int j = size-count;j<size-count+nextCount;j++)
 			{
-				cout<<j<<endl;
+				cerr<<j<<endl;
 				toAdd.push_back(initVec[j]);
 				print(toAdd);
 			}
-			cout<<"I am here now"<<endl;
+			cerr<<"I am here now"<<endl;
 			if(this->board[currRow][currCol].size()!=0)
 				this->board[currRow][currCol].insert(this->board[currRow][currCol].end(),toAdd.begin(),toAdd.end());
 			else
 				this->board[currRow][currCol] = toAdd;
 
-			cout<<"I am here as well"<<endl;
+			cerr<<"I am here as well"<<endl;
 			prevSquare = nextSquare;	
 			count -= nextCount;
 		}	
-		count = int(move[0]);
+		count = int(move[0])-48;
 		int i = count;
 		while(i--)
 		{
 			this->board[row][col].pop_back();
 		}
+		print(this->board[row][col]);
 		//this->board[row][col] = this->board[row][col][:-count];
 	}
 }
@@ -431,7 +443,7 @@ vector<string> Board::getMove(char c, int i, int j, int height, bool isTopCapSto
 // 		int isPossible = this->squareToNum(move.substr(1));
 // 		if(isPossible==-1)
 // 		{
-// 			cout<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
+// 			cerr<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
 // 			return;
 // 		}
 // 		int row = int(move.substr(1)[0])-97;
@@ -457,7 +469,7 @@ vector<string> Board::getMove(char c, int i, int j, int height, bool isTopCapSto
 // 		int isPossible = this->squareToNum(move.substr(1,2));
 // 		if(isPossible==-1)
 // 		{
-// 			cout<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
+// 			cerr<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
 // 			return;
 // 		}
 // 		int row = int(move.substr(1)[0])-97;
@@ -559,10 +571,10 @@ vector<string> Board::getMove(char c, int i, int j, int height, bool isTopCapSto
 // 	// }
 // }
 
-// int Board::evaluate()
-// {
-// 	return 1;
-// }
+int Board::evaluate()
+{
+	return 1;
+}
 
 // // void print(vector elems)
 // // {
@@ -572,107 +584,107 @@ vector<string> Board::getMove(char c, int i, int j, int height, bool isTopCapSto
 // // 	cerr<<endl;
 // // }
 
-// struct Node
-// {
-// 	Node** children;
-// 	int no_of_children;
-// 	int value;
+struct Node
+{
+	Node** children;
+	int no_of_children;
+	int value;
 
-// 	void deleteNode();
-// };
+	void deleteNode();
+};
 
 
-// void Node::deleteNode()
-// {
-// 	for (int i = 0; i != this->no_of_children; ++i)
-// 		this->children[i]->deleteNode();
-// 	delete [] this->children;
-// 	delete this;
-// }
+void Node::deleteNode()
+{
+	for (int i = 0; i != this->no_of_children; ++i)
+		this->children[i]->deleteNode();
+	delete [] this->children;
+	delete this;
+}
 
-// class Tree{
+class Tree{
 
-// public:
-// 	Node* tree;
-// 	int bestMove;
+public:
+	Node* tree;
+	int bestMove;
 
-// 	Tree(Board board, int playerNo)
-// 	{
-// 		tree = makeTree(board,0,playerNo);
-// 		bestMove = -1;
-// 	}
-// 	Node* makeTree(Board board, int depth, int playerNo);
-// 	void deleteTree();
-// 	int minimax(Node* root, int depth, bool maxNode, int alpha, int beta);
-// };
+	Tree(Board board, int playerNo)
+	{
+		tree = makeTree(board,0,playerNo);
+		bestMove = -1;
+	}
+	Node* makeTree(Board board, int depth, int playerNo);
+	void deleteTree();
+	int minimax(Node* root, int depth, bool maxNode, int alpha, int beta);
+};
 
-// Node* Tree::makeTree(Board board, int depth, int playerNo)
-// {
-// 	Node* node = new Node();
-// 	vector<string> validMoves = board.getValidMoves(playerNo);
-// 	node -> no_of_children = validMoves.size();
-// 	node -> value = board.evaluate();
-// 	if (depth > 0 && node->no_of_children > 0)
-// 	{
-// 		node -> children = new Node* [node->no_of_children];
-// 		for (int i = 0; i != node->no_of_children; ++i){
-// 			//Board boardTemp;
-// 			board.makeMove(playerNo,validMoves[i]);
-// 			node -> children[i] = this->makeTree(board, depth - 1,1-playerNo);
-// 		}
-// 	}
-// 	else
-// 	{
-// 		node -> children = NULL;
-// 	}
-// 	return node;
-// }
+Node* Tree::makeTree(Board board, int depth, int playerNo)
+{
+	Node* node = new Node();
+	vector<string> validMoves = board.getValidMoves(playerNo);
+	node -> no_of_children = validMoves.size();
+	node -> value = board.evaluate();
+	if (depth > 0 && node->no_of_children > 0)
+	{
+		node -> children = new Node* [node->no_of_children];
+		for (int i = 0; i != node->no_of_children; ++i){
+			//Board boardTemp;
+			board.makeMove(playerNo,validMoves[i]);
+			node -> children[i] = this->makeTree(board, depth - 1,1-playerNo);
+		}
+	}
+	else
+	{
+		node -> children = NULL;
+	}
+	return node;
+}
 
-// void Tree::deleteTree()
-// {
-// 	for (int i = 0; i != this->tree->no_of_children; ++i)
-// 		this->tree->children[i]->deleteNode();
-// 	delete [] this->tree->children;
-// }
+void Tree::deleteTree()
+{
+	for (int i = 0; i != this->tree->no_of_children; ++i)
+		this->tree->children[i]->deleteNode();
+	delete [] this->tree->children;
+}
 
-// int Tree::minimax(Node* root, int depth, bool maxNode, int alpha, int beta)
-// {
-// 	///Assume depth of 3
-// 	if (depth == 3)
-// 		return (root -> value);
+int Tree::minimax(Node* root, int depth, bool maxNode, int alpha, int beta)
+{
+	///Assume depth of 3
+	if (depth == 3)
+		return (root -> value);
 
-// 	if (maxNode)
-// 	{
-// 		int best = INT_MIN;
-// 		for (int i=0; i < (root -> no_of_children); i++)
-// 		{
-// 			int value = minimax(tree->children[i], depth+1, false, alpha, beta);
-// 			this->bestMove = i;
-// 			best = 	max(best, value);
-// 			alpha = std::max(alpha, best);
+	if (maxNode)
+	{
+		int best = INT_MIN;
+		for (int i=0; i < (root -> no_of_children); i++)
+		{
+			int value = minimax(tree->children[i], depth+1, false, alpha, beta);
+			this->bestMove = i;
+			best = 	max(best, value);
+			alpha = std::max(alpha, best);
 
-// 			if (beta <= alpha)
-// 				break;
-// 		}
-// 		return best;
-// 	}
-// 	else
-// 	{
-// 		int best = INT_MAX;
+			if (beta <= alpha)
+				break;
+		}
+		return best;
+	}
+	else
+	{
+		int best = INT_MAX;
 
-// 		for (int i=0; i< (root->no_of_children); i++)
-// 		{
-// 			int value = minimax(root -> children[i], depth+1, true, alpha, beta);
-// 			this->bestMove = i;
-// 			best = std::min(best, value);
-// 			beta = std::min(beta, best);
+		for (int i=0; i< (root->no_of_children); i++)
+		{
+			int value = minimax(root -> children[i], depth+1, true, alpha, beta);
+			this->bestMove = i;
+			best = std::min(best, value);
+			beta = std::min(beta, best);
 
-// 			if (beta <= alpha)
-// 				break;
-// 		}
-// 		return best;
-// 	}
-// }
+			if (beta <= alpha)
+				break;
+		}
+		return best;
+	}
+}
 
 class Game{
 
@@ -732,6 +744,8 @@ string Game::getBestMove(){
 	// int highestValue = minmaxTree -> minimax(minmaxTree->tree, 0, true, INT_MIN, INT_MAX);
 	// int bestMoveIndex = minmaxTree -> bestMove;
 	vector<string> v = this->board.getValidMoves(currentPiece);
+	cerr<<"ALL VALID MOVES!!!!!!!!!!!!!!!!: ";
+	print(v);
 	int bestMoveIndex = rand()%v.size();
 	string bestMove = v[bestMoveIndex];
 	// minmaxTree -> deleteTree();
