@@ -15,11 +15,11 @@ using namespace std;
 //Debugger functions 
 void split(const string &s, char delim, vector<string> &elems)
 {
-    stringstream ss;
-    ss.str(s);
-    string item;
-    while (getline(ss, item, delim)) {
-        elems.push_back(item);
+	stringstream ss;
+	ss.str(s);
+	string item;
+	while (getline(ss, item, delim)) {
+		elems.push_back(item);
     }
 }
 
@@ -98,6 +98,305 @@ void print(vector<string> elems)
 // 	int col = int(sqStr[1]);
 // 	if(row<1 or row>this->dimension or col<1 or col>this->dimension)
 // 		return -1;
+class Board{
+
+public:
+	int dimension;
+	//vector<string> board[dimension];
+	vector<string> **board;
+	class Player{
+	public:
+		int flatStones;
+		int capStones;
+		Player(int flats,int caps)
+		{
+			this->flatStones = flats;
+			this->capStones = caps;
+		}
+	};
+
+	vector<Player> listOfPlayers;
+
+	Board(){
+
+	}
+	Board(int n){
+		this->dimension = n;
+		//Default as 5*5
+		listOfPlayers.push_back(Player(21,1));
+		listOfPlayers.push_back(Player(21,1)); 
+		board = new vector<string>*[dimension];
+		for(int i=0;i<dimension;i++)
+			board[i] = new vector<string>[dimension];
+	}
+
+	// Board(Board &b){
+	// 	this->dimension = b.dimension;
+	// 	this->listOfPlayers = NULL;
+	// 	this->board = NULL;
+	// }
+
+	void makeMove(int playerNo, string move);
+	int squareToNum(string sqStr);
+	int evaluate();
+	void setDimension(int n);
+	vector<string> getValidMoves(int currentPiece);
+	vector<string> getValidAdds(int currentPiece);
+	vector<string> getValidStackMoves(int currentPiece);
+	vector<string> getMove(char c, int i, int j, int height, bool isTopCapStone, string str, int count);
+};
+
+void Board::setDimension(int n)
+{
+		this->dimension = n;
+		//Default as 5*5
+		listOfPlayers.push_back(Player(21,1));
+		listOfPlayers.push_back(Player(21,1)); 
+		board = new vector<string>*[dimension];
+		for(int i=0;i<dimension;i++)
+			board[i] = new vector<string>[dimension];
+}
+int Board::squareToNum(string sqStr)
+{
+	if(sqStr.length()!=2){
+		return -1;
+	}
+	if(!(isalpha(sqStr[0])) or !(islower(sqStr[0])) or !(isdigit(sqStr[1]))){
+		return -1;
+	}
+
+	int row = int(sqStr[0]) - 96;
+	int col = int(sqStr[1]) - 48;
+	if(row<1 or row>this->dimension or col<1 or col>this->dimension){
+		return -1;
+	}
+
+	return 1;
+}
+
+void Board::makeMove(int currentPiece, string move)
+{
+	/* Update Shit
+		-> Update the board the of this.Game object
+		-> Update the GameState
+	*/
+	if(isalpha(move[0]))
+	{
+		int isPossible = this->squareToNum(move.substr(1));
+		if(isPossible==-1)
+		{
+			cout<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
+			return;
+		}
+		int row = int(move.substr(1)[0])-97;
+		int col = int(move.substr(1)[1])-49; 
+		if(move[0]=='F' or move[0]=='S')
+		{
+			string s;
+			s = char(currentPiece+0)+' '+move[0];
+			this->board[row][col].push_back(s);
+			this->listOfPlayers[currentPiece].flatStones-=1;
+ 		}
+ 		else if(move[0]=='C')
+ 		{
+ 			string s;
+ 			s = char(currentPiece+0)+' '+move[0];
+ 			this->board[row][col].push_back(s);
+ 			this->listOfPlayers[currentPiece].flatStones -= 1;
+ 		}
+	}
+	else if(isdigit(move[0]))
+	{
+		int count = int(move[0]);
+		int isPossible = this->squareToNum(move.substr(1,2));
+		if(isPossible==-1)
+		{
+			cout<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
+			return;
+		}
+		int row = int(move.substr(1)[0])-97;
+		int col = int(move.substr(1)[1])-1; 
+		char direction = move[3];
+		int change;
+		if(direction=='+')
+			change = 1;
+		else if(direction=='-')
+			change = -1;
+		else if(direction=='>')
+			change = 1;
+		else if(direction=='<')
+			change = -1;
+		int prevSquare = this->dimension * (col - 1) + (row - 1);
+		for(int i = 4;i<move.length();i++)
+		{
+			int nextCount = int(move[i]);
+			int nextSquare = prevSquare + change;
+			int currRow = (nextSquare%dimension==0?nextSquare/dimension-1:nextSquare/dimension);
+			int currCol = (nextSquare%dimension==0?nextSquare/dimension-1:nextSquare%dimension-1);
+			int lastIndex = this->board[currRow][currCol].size()-1;
+			if( (this->board[currRow][currCol].size() >  0) and (this->board[currRow][currCol][lastIndex][1]=='S'))
+				this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+' '+'F';
+				//Pull out from top of vect	or , till top-nextCount
+			vector<string> initVec = this->board[row][col];
+			vector<string> toAdd;
+			int size = initVec.size()-1;
+			for(int j = size-count;j<size-count+nextCount;j++)
+			{
+				toAdd.push_back(initVec[j]);
+			}
+
+			if(this->board[currRow][currCol].size()!=0)
+				this->board[currRow][currCol].insert(this->board[currRow][currCol].end(),toAdd.begin(),toAdd.end());
+			else
+				this->board[currRow][currCol] = toAdd;
+
+			prevSquare = nextSquare;	
+			count -= nextCount;
+		}	
+		count = int(move[0]);
+		int i = count;
+		while(i--)
+		{
+			this->board[row][col].pop_back();
+		}
+		//this->board[row][col] = this->board[row][col][:-count];
+	}
+}
+
+vector<string> Board::getValidMoves(int currentPiece){
+	vector<string> v = this->getValidAdds(currentPiece);
+	vector<string> v1 = this->getValidStackMoves(currentPiece);
+	if (v.empty()){
+		// cerr << "Adds : \n";
+		// for (int i=0; i<v1.size(); i++){
+		// 	cerr << v1[i] << " ";
+		// }
+		// cerr << "\n";
+		return v1;
+	}
+	else{
+		v.insert(v.end(),v1.begin(),v1.end());
+		// cerr << "Adds: \n"; 
+		// for (int i=0; i<v.size(); i++){
+		// 	cerr << v[i] << " ";
+		// }
+		// cerr << "\n";
+		return v;
+	}
+}
+
+vector<string> Board::getValidAdds(int currentPiece){
+	vector<string> list;
+	char c;
+	int flats = this->listOfPlayers[currentPiece].flatStones;
+	int caps = this->listOfPlayers[currentPiece].capStones;
+	for (int i=0; i<this->dimension; i++){
+		for (int j=0; j<this->dimension; j++){
+			if (this->board[i][j].empty()){
+				if (caps>0){
+					string s = "C";
+					s += char('a'+j);
+					s += std::to_string(i);
+					list.push_back(s);
+				}
+				if (flats>0){
+					string s = "F";
+					s += char('a'+j);
+					s += std::to_string(i);
+					list.push_back(s);
+					s = "S";
+					s += char('a'+j);
+					s += std::to_string(i);
+					list.push_back(s);
+				}
+			}
+			else
+				continue;
+		}
+	}
+	return list;
+}
+vector<string> Board::getValidStackMoves(int currentPiece){
+	vector<string> list;
+	for (int i=0; i<this->dimension; i++){
+		for (int j=0; j<this->dimension; j++){
+			if (this->board[i][j].empty() || this->board[i][j].back()[1]!=char('0'+currentPiece))   /////assuming the pieces are placed as (F/S/C)(0/1)
+				continue;
+			else{
+				int heightStack = this->board[i][j].size();
+				if (heightStack > this->dimension)
+					heightStack = this->dimension;
+				if (this->board[i][j].back()[0]!='C'){
+					string st = "";
+					st += char('a'+j);
+					st += std::to_string(i)+"<";
+					vector<string> v1 = this->getMove('<',i,j,heightStack,true,st,0);
+					if (list.empty())
+						list = v1;
+					else
+						list.insert(list.end(),v1.begin(),v1.end());
+				}
+				else{
+					string st = "";
+					st += char('a'+j);
+					st += std::to_string(i)+"<";
+					vector<string> v1 = this->getMove('<',i,j,heightStack,false,st,0);
+					if (list.empty())
+						list = v1;
+					else
+						list.insert(list.end(),v1.begin(),v1.end());
+				}
+			}
+		}
+	}
+	return list;
+}
+
+//////To be tested and verified again
+vector<string> Board::getMove(char c, int i, int j, int height, bool isTopCapStone, string str, int count){
+	vector<string> v;
+	if (height==0 || j==0){
+		if (count==0)
+			return v;
+		else{
+			v.push_back(std::to_string(count) + str);
+			return v;
+		}
+	}	
+	if (this->board[i][j-1].back()[0] == 'C')
+		return v;
+	else if (this->board[i][j-1].back()[0] == 'S'){
+		if (isTopCapStone){
+			v.push_back(std::to_string(count+1)+str+"1");
+			return v;
+		}
+		else{
+			if (count==0)
+				return v;
+			else{
+				v.push_back(std::to_string(count)+str);
+				return v;
+			}
+		}
+	}
+	else{	////FlatStone or empty
+		for (int k=1; k<=height; k++){
+			vector<string> v1 = this->getMove(c,i,j-1,height-k,isTopCapStone,str+std::to_string(k),count+k);
+			if (v1.empty()){
+				continue;
+			}
+			else{
+				if (v.empty())
+					v = v1;
+				else
+					v.insert(v.end(),v1.begin(),v1.end());
+			}
+		}
+		return v;
+	}	
+}
+//////Similar functions for right, up and down!
+
 
 // 	return 1;
 // }
@@ -410,13 +709,14 @@ string Game::getBestMove(){
 		currentPiece = this->currTurnNo;
 	else
 		currentPiece = 1 - this->currTurnNo;
-
-	Tree* minmaxTree = new Tree(this->board, currentPiece);
-	int highestValue = minmaxTree -> minimax(minmaxTree->tree, 0, true, INT_MIN, INT_MAX);
-	int bestMoveIndex = minmaxTree -> bestMove;
-	string bestMove = this->board.getValidMoves(currentPiece)[bestMoveIndex];
-	minmaxTree -> deleteTree();
-	delete minmaxTree;
+	// Tree* minmaxTree = new Tree(this->board, currentPiece);
+	// int highestValue = minmaxTree -> minimax(minmaxTree->tree, 0, true, INT_MIN, INT_MAX);
+	// int bestMoveIndex = minmaxTree -> bestMove;
+	vector<string> v = this->board.getValidMoves(currentPiece);
+	int bestMoveIndex = rand()%v.size();
+	string bestMove = v[bestMoveIndex];
+	// minmaxTree -> deleteTree();
+	// delete minmaxTree;
 	return bestMove;
 }
 
@@ -445,15 +745,16 @@ class AIPlayer{
 		AIPlayer(string start)
 		{
 			//TODO:Initialize the params 
-			
 			string data;
 			cin >> data;
-			vector<string> elems;
-			split(data,' ',elems);
-			print(elems);
-			this->playerNo = atoi(elems[0].c_str())-1;
-			this->sizeOfBoard = atoi(elems[1].c_str());
-			this->timeLeft = atoi(elems[2].c_str());
+			// cerr << data << endl;
+			// vector<string> elems;
+			// split(data,' ',elems);
+			this->playerNo = atoi(data.c_str())-1;
+			cin >> data;
+			this->sizeOfBoard = atoi(data.c_str());
+			cin >> data;
+			this->timeLeft = atoi(data.c_str()); //(elems[2].c_str());
 			this->game.setDim(this->sizeOfBoard);
 			this->Play();
 		}
