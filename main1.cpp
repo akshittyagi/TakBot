@@ -14,11 +14,11 @@ using namespace std;
 //Debugger functions 
 void split(const string &s, char delim, vector<string> &elems)
 {
-    stringstream ss;
-    ss.str(s);
-    string item;
-    while (getline(ss, item, delim)) {
-        elems.push_back(item);
+	stringstream ss;
+	ss.str(s);
+	string item;
+	while (getline(ss, item, delim)) {
+		elems.push_back(item);
     }
 }
 
@@ -71,9 +71,12 @@ public:
 
 	void makeMove(int playerNo, string move);
 	int squareToNum(string sqStr);
-	vector<string> getValidMoves(int currentPiece);
 	int evaluate();
 	void setDimension(int n);
+	vector<string> getValidMoves(int currentPiece);
+	vector<string> getValidAdds(int currentPiece);
+	vector<string> getValidStackMoves(int currentPiece);
+	vector<string> getMove(char c, int i, int j, int height, bool isTopCapStone, string str, int count);
 };
 
 void Board::setDimension(int n)
@@ -88,15 +91,18 @@ void Board::setDimension(int n)
 }
 int Board::squareToNum(string sqStr)
 {
-	if(sqStr.length()!=2)
+	if(sqStr.length()!=2){
 		return -1;
-	if(!(isalpha(sqStr[0])) or !(islower(sqStr[0])) or !(isdigit(sqStr[1])) )
+	}
+	if(!(isalpha(sqStr[0])) or !(islower(sqStr[0])) or !(isdigit(sqStr[1]))){
 		return -1;
+	}
 
 	int row = int(sqStr[0]) - 96;
-	int col = int(sqStr[1]);
-	if(row<1 or row>this->dimension or col<1 or col>this->dimension)
+	int col = int(sqStr[1]) - 48;
+	if(row<1 or row>this->dimension or col<1 or col>this->dimension){
 		return -1;
+	}
 
 	return 1;
 }
@@ -116,7 +122,7 @@ void Board::makeMove(int currentPiece, string move)
 			return;
 		}
 		int row = int(move.substr(1)[0])-97;
-		int col = int(move.substr(1)[1])-1; 
+		int col = int(move.substr(1)[1])-49; 
 		if(move[0]=='F' or move[0]=='S')
 		{
 			string s;
@@ -146,9 +152,9 @@ void Board::makeMove(int currentPiece, string move)
 		char direction = move[3];
 		int change;
 		if(direction=='+')
-			change = this->dimension;
+			change = 1;
 		else if(direction=='-')
-			change = -1*this->dimension;
+			change = -1;
 		else if(direction=='>')
 			change = 1;
 		else if(direction=='<')
@@ -191,54 +197,139 @@ void Board::makeMove(int currentPiece, string move)
 }
 
 vector<string> Board::getValidMoves(int currentPiece){
-	vector<string> v;
-	return v;
-	/////If there is no empty space, game doesnot end. Moving stacks is an option, which might create an empty space
-	// int square = this.squareToNum(move,1,move.size());
-	// if(move[0]=='F' or move[0]=='S')
-	// {
-	// 	this.board[square].push_back(move[0]+" "+currentPiece);
-	// 	this.listOfPlayers[currentPiece].flatStones -= 1;
-	// }
-	// else if(move[0]=='C')
-	// {
-	// 	this.board[square].push_back(move[0]+" "+currentPiece);
-	// 	this.listOfPlayers[currentPiece].capStones -= 1;
-	// }
-
-
-	// else if(isdigit(move[0]))
-	// {
-	// 	int count = int(move[0]);
-	// 	int square = this.squareToNum(move,1,3);
-	// 	string direction = move[3];
-	// 	int change;
-	// 	if(direction=="+")
-	// 		change = this.dimension;	
-	// 	else if(direction=="-")
-	// 		change = -1*this.dimension;
-	// 	else if(direction==">")
-	// 		change = 1;
-	// 	else if(direction=="<")
-	// 		change = -1;
-	// 	int prevSquare = square;
-	// 	for(int i=4;i<move.size();i++)
-	// 	{//Ignore the syntax from this point
-	// 		int nextCount = int(move[i]);
-	// 		int nextSquare = prevSquare + change;
-	// 		if( (this.board[nextSquare].size()>0) and (this.board[nextSquare][-1][1] == 'S'))
-	// 			this.board[nextSquare][-1] = this.board[nextSquare][-1][0] + "F";	
-	// 		if(nextCount-count==0)
-	// 			this.board[nextSquare] += this.board[square][-count:];
-	// 		else
-	// 			this.board[nextSquare] += this.board[square][-count:-count+nextCount];
-	// 		prevSquare = nextSquare;
-	// 		count -= nextCount
-	// 	}
-	// 	count = int(move[0])
-	// 	this.board[square] = this.board[square][:-count]
-	// }
+	vector<string> v = this->getValidAdds(currentPiece);
+	vector<string> v1 = this->getValidStackMoves(currentPiece);
+	if (v.empty()){
+		// cerr << "Adds : \n";
+		// for (int i=0; i<v1.size(); i++){
+		// 	cerr << v1[i] << " ";
+		// }
+		// cerr << "\n";
+		return v1;
+	}
+	else{
+		v.insert(v.end(),v1.begin(),v1.end());
+		// cerr << "Adds: \n"; 
+		// for (int i=0; i<v.size(); i++){
+		// 	cerr << v[i] << " ";
+		// }
+		// cerr << "\n";
+		return v;
+	}
 }
+
+vector<string> Board::getValidAdds(int currentPiece){
+	vector<string> list;
+	char c;
+	int flats = this->listOfPlayers[currentPiece].flatStones;
+	int caps = this->listOfPlayers[currentPiece].capStones;
+	for (int i=0; i<this->dimension; i++){
+		for (int j=0; j<this->dimension; j++){
+			if (this->board[i][j].empty()){
+				if (caps>0){
+					string s = "C";
+					s += char('a'+j);
+					s += std::to_string(i);
+					list.push_back(s);
+				}
+				if (flats>0){
+					string s = "F";
+					s += char('a'+j);
+					s += std::to_string(i);
+					list.push_back(s);
+					s = "S";
+					s += char('a'+j);
+					s += std::to_string(i);
+					list.push_back(s);
+				}
+			}
+			else
+				continue;
+		}
+	}
+	return list;
+}
+vector<string> Board::getValidStackMoves(int currentPiece){
+	vector<string> list;
+	for (int i=0; i<this->dimension; i++){
+		for (int j=0; j<this->dimension; j++){
+			if (this->board[i][j].empty() || this->board[i][j].back()[1]!=char('0'+currentPiece))   /////assuming the pieces are placed as (F/S/C)(0/1)
+				continue;
+			else{
+				int heightStack = this->board[i][j].size();
+				if (heightStack > this->dimension)
+					heightStack = this->dimension;
+				if (this->board[i][j].back()[0]!='C'){
+					string st = "";
+					st += char('a'+j);
+					st += std::to_string(i)+"<";
+					vector<string> v1 = this->getMove('<',i,j,heightStack,true,st,0);
+					if (list.empty())
+						list = v1;
+					else
+						list.insert(list.end(),v1.begin(),v1.end());
+				}
+				else{
+					string st = "";
+					st += char('a'+j);
+					st += std::to_string(i)+"<";
+					vector<string> v1 = this->getMove('<',i,j,heightStack,false,st,0);
+					if (list.empty())
+						list = v1;
+					else
+						list.insert(list.end(),v1.begin(),v1.end());
+				}
+			}
+		}
+	}
+	return list;
+}
+
+//////To be tested and verified again
+vector<string> Board::getMove(char c, int i, int j, int height, bool isTopCapStone, string str, int count){
+	vector<string> v;
+	if (height==0 || j==0){
+		if (count==0)
+			return v;
+		else{
+			v.push_back(std::to_string(count) + str);
+			return v;
+		}
+	}	
+	if (this->board[i][j-1].back()[0] == 'C')
+		return v;
+	else if (this->board[i][j-1].back()[0] == 'S'){
+		if (isTopCapStone){
+			v.push_back(std::to_string(count+1)+str+"1");
+			return v;
+		}
+		else{
+			if (count==0)
+				return v;
+			else{
+				v.push_back(std::to_string(count)+str);
+				return v;
+			}
+		}
+	}
+	else{	////FlatStone or empty
+		for (int k=1; k<=height; k++){
+			vector<string> v1 = this->getMove(c,i,j-1,height-k,isTopCapStone,str+std::to_string(k),count+k);
+			if (v1.empty()){
+				continue;
+			}
+			else{
+				if (v.empty())
+					v = v1;
+				else
+					v.insert(v.end(),v1.begin(),v1.end());
+			}
+		}
+		return v;
+	}	
+}
+//////Similar functions for right, up and down!
+
 
 int Board::evaluate()
 {
@@ -391,14 +482,14 @@ public:
 void Game::setDim(int n)
 {
 	this->dimension = n;
-		this->totSquares = n*n;
-		this->currTurnNo = 0;
-		this->maxNoOfMovablePieces = this->dimension;
-		this->maxUp = this->dimension;
-		this->maxDown = 1;
-		this->maxRight = char(int('a'+n-1));
-		this->noOfMoves = 0;
-		this->board.setDimension(this->dimension);
+	this->totSquares = n*n;
+	this->currTurnNo = 0;
+	this->maxNoOfMovablePieces = this->dimension;
+	this->maxUp = this->dimension;
+	this->maxDown = 1;
+	this->maxRight = char(int('a'+n-1));
+	this->noOfMoves = 0;
+	this->board.setDimension(this->dimension);
 }
 string Game::getBestMove(){
 	int currentPiece;
@@ -408,13 +499,14 @@ string Game::getBestMove(){
 		currentPiece = this->currTurnNo;
 	else
 		currentPiece = 1 - this->currTurnNo;
-
-	Tree* minmaxTree = new Tree(this->board, currentPiece);
-	int highestValue = minmaxTree -> minimax(minmaxTree->tree, 0, true, INT_MIN, INT_MAX);
-	int bestMoveIndex = minmaxTree -> bestMove;
-	string bestMove = this->board.getValidMoves(currentPiece)[bestMoveIndex];
-	minmaxTree -> deleteTree();
-	delete minmaxTree;
+	// Tree* minmaxTree = new Tree(this->board, currentPiece);
+	// int highestValue = minmaxTree -> minimax(minmaxTree->tree, 0, true, INT_MIN, INT_MAX);
+	// int bestMoveIndex = minmaxTree -> bestMove;
+	vector<string> v = this->board.getValidMoves(currentPiece);
+	int bestMoveIndex = rand()%v.size();
+	string bestMove = v[bestMoveIndex];
+	// minmaxTree -> deleteTree();
+	// delete minmaxTree;
 	return bestMove;
 }
 
@@ -443,15 +535,16 @@ class AIPlayer{
 		AIPlayer(string start)
 		{
 			//TODO:Initialize the params 
-			
 			string data;
 			cin >> data;
-			vector<string> elems;
-			split(data,' ',elems);
-			print(elems);
-			this->playerNo = atoi(elems[0].c_str())-1;
-			this->sizeOfBoard = atoi(elems[1].c_str());
-			this->timeLeft = atoi(elems[2].c_str());
+			// cerr << data << endl;
+			// vector<string> elems;
+			// split(data,' ',elems);
+			this->playerNo = atoi(data.c_str())-1;
+			cin >> data;
+			this->sizeOfBoard = atoi(data.c_str());
+			cin >> data;
+			this->timeLeft = atoi(data.c_str()); //(elems[2].c_str());
 			this->game.setDim(this->sizeOfBoard);
 			this->Play();
 		}
