@@ -60,8 +60,7 @@ class Game:
 		return chr(row + 97) + str(col + 1)
 
 	def execute_move(self, move_string):
-		'''Execute move
-		'''
+		'''Execute move'''
 
 		if self.turn == 0:
 			self.moves += 1
@@ -213,3 +212,4 @@ class RandomPlayer:
 			self.game.execute_move(move)
 
 random_player = RandomPlayer()
+"""4b2>211"""
