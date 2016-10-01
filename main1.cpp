@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <string>
 #include <stdlib.h>
-#include "Board.h"
+//#include "Board.h"
 #define MAX 10000
 #define MIN -10000
 
@@ -165,12 +165,16 @@ int Board::squareToNum(string sqStr)
 		return -1;
 	}
 
-	int row = int(sqStr[0]) - 96;
-	int col = int(sqStr[1]) - 48;
+	int col = int(sqStr[0]) - 96;
+	int row = int(sqStr[1]) - 48;
 	if(row<1 or row>this->dimension or col<1 or col>this->dimension){
+		cerr<<"Problem ";
+		cerr<<"row: "<<row<<" col: "<<col<<endl;
 		return -1;
 	}
 
+	cerr<<"Ok ";
+	cerr<<"row: "<<row<<" col: "<<col<<endl;
 	return 1;
 }
 
@@ -180,6 +184,7 @@ void Board::makeMove(int currentPiece, string move)
 		-> Update the board the of this.Game object
 		-> Update the GameState
 	*/
+	cout<<"Move selected: "<<move<<endl;
 	if(isalpha(move[0]))
 	{
 		int isPossible = this->squareToNum(move.substr(1));
@@ -188,20 +193,23 @@ void Board::makeMove(int currentPiece, string move)
 			cout<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
 			return;
 		}
-		int row = int(move.substr(1)[0])-97;
-		int col = int(move.substr(1)[1])-49; 
+		int col = int(move.substr(1)[0])-97;
+		int row = int(move.substr(1)[1])-49; 
+		cout<<"Computed Row: "<<row<<" Computed Col: "<<col<<endl;
 		if(move[0]=='F' or move[0]=='S')
 		{
-			string s;
-			s = char(currentPiece+0)+' '+move[0];
+			string s="";
+			s += char(currentPiece+49)+" "+move[0];
+			cout<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
 			this->board[row][col].push_back(s);
 			this->listOfPlayers[currentPiece].flatStones-=1;
  		}
  		else if(move[0]=='C')
  		{
- 			string s;
- 			s = char(currentPiece+0)+' '+move[0];
+ 			string s="";
+ 			s += char(currentPiece+49)+" "+move[0];
  			this->board[row][col].push_back(s);
+ 			cout<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
  			this->listOfPlayers[currentPiece].flatStones -= 1;
  		}
 	}
@@ -214,8 +222,8 @@ void Board::makeMove(int currentPiece, string move)
 			cout<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
 			return;
 		}
-		int row = int(move.substr(1)[0])-97;
-		int col = int(move.substr(1)[1])-1; 
+		int col = int(move.substr(1)[0])-97;
+		int row = int(move.substr(1)[1])-49; 
 		char direction = move[3];
 		int change;
 		if(direction=='+')
@@ -226,30 +234,41 @@ void Board::makeMove(int currentPiece, string move)
 			change = 1;
 		else if(direction=='<')
 			change = -1;
-		int prevSquare = this->dimension * (col - 1) + (row - 1);
+		int prevSquare = col + this->dimension*(row) + 1;
 		for(int i = 4;i<move.length();i++)
 		{
 			int nextCount = int(move[i]);
 			int nextSquare = prevSquare + change;
+			cout<<"prevSquare: "<<prevSquare<<" NextSquare: "<<nextSquare<<" Change: "<<change<<endl;
 			int currRow = (nextSquare%dimension==0?nextSquare/dimension-1:nextSquare/dimension);
-			int currCol = (nextSquare%dimension==0?nextSquare/dimension-1:nextSquare%dimension-1);
+			int currCol = (nextSquare%dimension==0?dimension-1:nextSquare%dimension-1);
+			cout<<"currRow: "<<currRow<<" currCol: "<<currCol<<endl;
 			int lastIndex = this->board[currRow][currCol].size()-1;
+			cout<<"lastIndex: "<<lastIndex<<endl;
 			if( (this->board[currRow][currCol].size() >  0) and (this->board[currRow][currCol][lastIndex][1]=='S'))
 				this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+' '+'F';
 				//Pull out from top of vect	or , till top-nextCount
+			cout<<"I am here"<<endl;
 			vector<string> initVec = this->board[row][col];
 			vector<string> toAdd;
 			int size = initVec.size()-1;
+			cout<<"initVec size "<<size+1<<endl;
+			cout<<"count: "<<count<<" size: "<<size<<endl;
+			cout<<"initVec: ";
+			print(initVec);
 			for(int j = size-count;j<size-count+nextCount;j++)
 			{
+				cout<<j<<endl;
 				toAdd.push_back(initVec[j]);
+				print(toAdd);
 			}
-
+			cout<<"I am here now"<<endl;
 			if(this->board[currRow][currCol].size()!=0)
 				this->board[currRow][currCol].insert(this->board[currRow][currCol].end(),toAdd.begin(),toAdd.end());
 			else
 				this->board[currRow][currCol] = toAdd;
 
+			cout<<"I am here as well"<<endl;
 			prevSquare = nextSquare;	
 			count -= nextCount;
 		}	
@@ -296,17 +315,17 @@ vector<string> Board::getValidAdds(int currentPiece){
 				if (caps>0){
 					string s = "C";
 					s += char('a'+j);
-					s += std::to_string(i);
+					s += std::to_string(i+1);
 					list.push_back(s);
 				}
 				if (flats>0){
 					string s = "F";
 					s += char('a'+j);
-					s += std::to_string(i);
+					s += std::to_string(i+1);
 					list.push_back(s);
 					s = "S";
 					s += char('a'+j);
-					s += std::to_string(i);
+					s += std::to_string(i+1);
 					list.push_back(s);
 				}
 			}
