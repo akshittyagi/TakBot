@@ -52,6 +52,15 @@ public:
 	Board(){
 
 	}
+	Board(const Board &obj)
+	{	
+		dimension = obj.dimension;
+		board = new vector<string>*[dimension];
+		for(int i=0;i<dimension;i++)
+			board[i] = new vector<string>[dimension];
+		**board = **obj.board;
+		listOfPlayers = obj.listOfPlayers;
+	}
 	Board(int n){
 		this->dimension = n;
 		//Default as 5*5
@@ -61,7 +70,13 @@ public:
 		for(int i=0;i<dimension;i++)
 			board[i] = new vector<string>[dimension];
 	}
+	~Board()
+	{
+		for (int i=0; i<dimension; i++)
+    		delete[] board[i];
 
+		delete[] board;
+	}
 	void makeMove(int playerNo, string move);
 	int squareToNum(string sqStr);
 	int evaluate();
@@ -126,7 +141,7 @@ void Board::makeMove(int currentPiece, string move)
 		int isPossible = this->squareToNum(move.substr(1));
 		if(isPossible==-1)
 		{
-			cout<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
+			cerr<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
@@ -166,7 +181,7 @@ void Board::makeMove(int currentPiece, string move)
 		int isPossible = this->squareToNum(move.substr(1,2));
 		if(isPossible==-1)
 		{
-			cout<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
+			cerr<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
