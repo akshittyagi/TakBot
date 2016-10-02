@@ -144,7 +144,7 @@ public:
 	vector<string> getValidMoves(int currentPiece);
 	vector<string> getValidAdds(int currentPiece);
 	vector<string> getValidStackMoves(int currentPiece);
-	vector<string> getMove(char c, int i, int j, int height, bool isTopCapStone, string str, int count);
+	vector<string> getMove(int direction,int i, int j, int height, bool isTopCapStone, string str, int count);
 };
 void Board::printBoard(){
 	for (int i=0; i<this->dimension; i++){
@@ -200,7 +200,7 @@ void Board::makeMove(int currentPiece, string move)
 		int isPossible = this->squareToNum(move.substr(1));
 		if(isPossible==-1)
 		{
-			cerr<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
+			cout<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
@@ -233,7 +233,6 @@ void Board::makeMove(int currentPiece, string move)
  			// cerr<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
  			this->listOfPlayers[currentPiece].capStones -= 1;
  		}
- 		this->printBoard();
 	}
 	else if(isdigit(move[0]))
 	{
@@ -241,7 +240,7 @@ void Board::makeMove(int currentPiece, string move)
 		int isPossible = this->squareToNum(move.substr(1,2));
 		if(isPossible==-1)
 		{
-			cerr<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
+			cout<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
@@ -304,32 +303,19 @@ void Board::makeMove(int currentPiece, string move)
 		{
 			this->board[row][col].pop_back();
 		}
-		this->printBoard();
 		// print(this->board[row][col]);
 		//this->board[row][col] = this->board[row][col][:-count];
 	}
 }
 
 vector<string> Board::getValidMoves(int currentPiece){
-	cerr << "1 : \n";
 	vector<string> v = this->getValidAdds(currentPiece);
-	cerr << "2 : \n";
 	vector<string> v1 = this->getValidStackMoves(currentPiece);
 	if (v.empty()){
-		// cerr << "Adds : \n";
-		// for (int i=0; i<v1.size(); i++){
-		// 	cerr << v1[i] << " ";
-		// }
-		// cerr << "\n";
 		return v1;
 	}
 	else{
 		v.insert(v.end(),v1.begin(),v1.end());
-		// cerr << "Adds: \n"; 
-		// for (int i=0; i<v.size(); i++){
-		// 	cerr << v[i] << " ";
-		// }
-		// cerr << "\n";
 		return v;
 	}
 }
@@ -369,57 +355,41 @@ vector<string> Board::getValidStackMoves(int currentPiece){
 	vector<string> list;
 	for (int i=0; i<this->dimension; i++){
 		for (int j=0; j<this->dimension; j++){
-			if (this->board[i][j].empty()){   /////assuming the pieces are placed as (F/S/C)(0/1)
-				// cerr << "Heya "<< i << " " << j << " \n";
-				continue;
-			}
-			if (this->board[i][j].back()[0]!=char('0'+(currentPiece+1))){
-				// cerr << "Lo : " << this->board[i][j].back() << "\n";
-				// cerr << "Heyo "<< i << " " << j << " \n";
+			if (this->board[i][j].empty() || this->board[i][j].back()[0]!=char('0'+(currentPiece+1))){   /////assuming the pieces are placed as (F/S/C)(0/1)
 				continue;
 			}
 			else{
-				// cerr << "i,j " << i << " " << j << endl;
 				int heightStack = this->board[i][j].size();
+				bool isTopCapStone = false;
 				if (heightStack > this->dimension)
 					heightStack = this->dimension;
-				if (this->board[i][j].back()[2]=='C'){
-					// cerr << "bkdsjk" << endl;
+				if (this->board[i][j].back()[2]=='C')
+					isTopCapStone = true;
+				string arr[4] = {"<",">","-","+"};
+				for (int k = 0; k<4; k++){	
 					string st = "";
 					st += char('a'+j);
-					st += std::to_string(i+1)+"<";
-					// cerr << "bkdsjk1" << endl;
-					vector<string> v1 = this->getMove('<',i,j,heightStack,true,st,0);
-					// cerr << "bkdsjk2" << endl;
+					st += std::to_string(i+1)+arr[k];
+					vector<string> v1 = this->getMove(k,i,j,heightStack,isTopCapStone,st,0);
 					if (list.empty())
 						list = v1;
 					else
 						list.insert(list.end(),v1.begin(),v1.end());
-				}
-				else{
-					// cerr << "sakjh" << endl;
-					string st = "";
-					st += char('a'+j);
-					st += std::to_string(i+1)+"<";
-					// cerr << "sakjh1" << endl;
-					vector<string> v1 = this->getMove('<',i,j,heightStack,false,st,0);
-					// cerr << "sakjh2" << endl;
-					if (list.empty())
-						list = v1;
-					else
-						list.insert(list.end(),v1.begin(),v1.end());
-				}
+				}	
 			}
 		}
 	}
-	// cerr << "HI........ " << list.size() << "...........\n";
 	return list;
 }
 
 //////To be tested and verified again
-vector<string> Board::getMove(char c, int i, int j, int height, bool isTopCapStone, string str, int count){
+vector<string> Board::getMove(int direction,int i, int j, int height, bool isTopCapStone, string str, int count){
+	//////	0 : "<"		1 : ">"		2 : "-" 	3: "+"
+	int arr1[4] = {j,this->dimension-j-1,i,this->dimension-i-1};   /////To check the extremes
+	int row[4] = {i,i,i-1,i+1};				////Row No. of adjacent square in the given direction
+	int col[4] = {j-1,j+1,j,j};				////Column No. of adjacent square in the given direction
 	vector<string> v;
-	if (height==0 || j==0){
+	if (height==0 || arr1[direction]==0){
 		if (count==0)
 			return v;
 		else{
@@ -427,13 +397,12 @@ vector<string> Board::getMove(char c, int i, int j, int height, bool isTopCapSto
 			return v;
 		}
 	}
-	// cerr << "Kbye \n";
-	if (!this->board[i][j-1].empty() && this->board[i][j-1].back()[2] == 'C'){
-		// cerr << "YOLO \n";
+	int nextRow = row[direction];
+	int nextCol = col[direction];
+	if (!this->board[nextRow][nextCol].empty() && (this->board[nextRow][nextCol].back()[2] == 'C')){
 		return v;
 	}
-	else if (!this->board[i][j-1].empty() && this->board[i][j-1].back()[2] == 'S'){
-		// cerr << "Kbye1 \n";
+	else if (!this->board[nextRow][nextCol].empty() && (this->board[nextRow][nextCol].back()[2] == 'S')){
 		if (isTopCapStone){
 			v.push_back(std::to_string(count+1)+str+"1");
 			return v;
@@ -448,10 +417,8 @@ vector<string> Board::getMove(char c, int i, int j, int height, bool isTopCapSto
 		}
 	}
 	else{	////FlatStone or empty
-		// cerr << "Kbye2 \n";
 		for (int k=1; k<=height; k++){
-			// cerr << "Kbye3 \n";
-			vector<string> v1 = this->getMove(c,i,j-1,height-k,isTopCapStone,str+std::to_string(k),count+k);
+			vector<string> v1 = this->getMove(direction,nextRow,nextCol,height-k,isTopCapStone,str+std::to_string(k),count+k);
 			if (v1.empty()){
 				continue;
 			}
@@ -784,9 +751,9 @@ string Game::getBestMove(){
 	// int bestMoveIndex = minmaxTree -> bestMove;
 	// cerr<<"ALL nkbkk: ";
 	vector<string> v = this->board.getValidMoves(currentPiece);
-	cerr<<"ALL VALID MOVES!!!!!!!!!!!!!!!!: ";
-	print(v);
-	cerr << endl;
+	// cerr<<"ALL VALID MOVES!!!!!!!!!!!!!!!!: ";
+	// print(v);
+	// cerr << endl;
 	int bestMoveIndex = rand()%v.size();
 	string bestMove = v[bestMoveIndex];
 	// minmaxTree -> deleteTree();
