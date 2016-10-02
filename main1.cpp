@@ -34,7 +34,7 @@ class Board{
 
 public:
 	int dimension;
-	//vector<string> board[dimension];
+	int bestMove;
 	vector<string> **board;
 	class Player{
 	public:
@@ -54,6 +54,7 @@ public:
 	}
 	Board(int n){
 		this->dimension = n;
+		bestMove = 0;
 		//Default as 5*5
 		listOfPlayers.push_back(Player(21,1));
 		listOfPlayers.push_back(Player(21,1)); 
@@ -61,16 +62,39 @@ public:
 		for(int i=0;i<dimension;i++)
 			board[i] = new vector<string>[dimension];
 	}
+	Board(const Board &obj)
+	{	
+		dimension = obj.dimension;
+		board = new vector<string>*[dimension];
+		for(int i=0;i<dimension;i++)
+		{
+			board[i] = new vector<string>[dimension];
+			for(int j=0;j<dimension;j++)
+			{
+				board[i][j] = obj.board[i][j];
+			}
+		}
+		listOfPlayers = obj.listOfPlayers;
+	}
+	~Board(void){
+		for (int i=0; i<dimension; i++)
+    		delete[] board[i];
+
+		delete[] board;
+		// cerr << "Delete mem ";
+	}
 
 	void makeMove(int playerNo, string move);
 	int squareToNum(string sqStr);
-	int evaluate();
+	int evaluate(int playerNo);
 	void setDimension(int n);
 	void printBoard();
 	vector<string> getValidMoves(int currentPiece);
 	vector<string> getValidAdds(int currentPiece);
 	vector<string> getValidStackMoves(int currentPiece);
 	vector<string> getMove(int direction,int i, int j, int height, bool isTopCapStone, string str, int count);
+	int minimax(Board board, int depth, bool maxNode, int alpha, int beta, int playerNo, int d);
+	int minimax_iter(Board board, int depth, bool maxNode, int alpha, int beta, int playerNo);
 };
 void Board::printBoard(){
 	for (int i=0; i<this->dimension; i++){
@@ -104,13 +128,8 @@ int Board::squareToNum(string sqStr)
 	int col = int(sqStr[0]) - 96;
 	int row = int(sqStr[1]) - 48;
 	if(row<1 or row>this->dimension or col<1 or col>this->dimension){
-		// cerr<<"Problem ";
-		// cerr<<"row: "<<row<<" col: "<<col<<endl;
 		return -1;
 	}
-
-	// cerr<<"Ok ";
-	// cerr<<"row: "<<row<<" col: "<<col<<endl;
 	return 1;
 }
 
@@ -120,7 +139,6 @@ void Board::makeMove(int currentPiece, string move)
 		-> Update the board the of this.Game object
 		-> Update the GameState
 	*/
-	// cerr<<"Move selected: "<<move<<endl;
 	if(isalpha(move[0]))
 	{
 		int isPossible = this->squareToNum(move.substr(1));
@@ -131,17 +149,12 @@ void Board::makeMove(int currentPiece, string move)
 		}
 		int col = int(move.substr(1)[0])-97;
 		int row = int(move.substr(1)[1])-49; 
-		// cerr<<"Computed Row: "<<row<<" Computed Col: "<<col<<endl;
 		if(move[0]=='F' or move[0]=='S')
 		{
 			string s="";
 			s += char(currentPiece+49);
-			// cerr<<"S:"<<s<<endl;
 			s += " ";
-			// cerr<<"S:"<<s<<endl;
 			s += move[0];
-			// cerr<<"S:"<<s<<endl;
-			// cerr<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
 			this->board[row][col].push_back(s);
 			this->listOfPlayers[currentPiece].flatStones-=1;
  		}
@@ -149,14 +162,9 @@ void Board::makeMove(int currentPiece, string move)
  		{
  			string s="";
 			s += char(currentPiece+49);
-			// cerr<<"S:"<<s<<endl;
 			s += " ";
-			// cerr<<"S:"<<s<<endl;
 			s += move[0];
-			// cerr<<"S:"<<s<<endl;
-			// cerr<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
 			this->board[row][col].push_back(s);
- 			// cerr<<"Adding "<<s<<" to "<<row<<" "<<col<<endl;
  			this->listOfPlayers[currentPiece].capStones -= 1;
  		}
 	}
@@ -186,30 +194,18 @@ void Board::makeMove(int currentPiece, string move)
 		{
 			int nextCount = int(move[i])-48;
 			int nextSquare = prevSquare + change;
-			// cerr<<"prevSquare: "<<prevSquare<<" NextSquare: "<<nextSquare<<" Change: "<<change<<endl;
 			int currRow = (nextSquare%dimension==0?nextSquare/dimension-1:nextSquare/dimension);
 			int currCol = (nextSquare%dimension==0?dimension-1:nextSquare%dimension-1);
-			// cerr<<"currRow: "<<currRow<<" currCol: "<<currCol<<endl;
 			int lastIndex = this->board[currRow][currCol].size()-1;
-			// cerr<<"lastIndex: "<<lastIndex<<endl;
 			if( (this->board[currRow][currCol].size() >  0) and (this->board[currRow][currCol][lastIndex][1]=='S'))
 				this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+' '+'F';
-				//Pull out from top of vect	or , till top-nextCount
-			// cerr<<"I am here"<<endl;
 			vector<string> initVec = this->board[row][col];
 			vector<string> toAdd;
 			int size = initVec.size();
-			// cerr<<"initVec size "<<size<<endl;
-			// cerr<<"count: "<<count<<" size: "<<size<<endl;
-			// cerr<<"initVec: ";
-			// print(initVec);
 			for(int j = size-count;j<size-count+nextCount;j++)
 			{
-				// cerr<<j<<endl;
 				toAdd.push_back(initVec[j]);
-				// print(toAdd);
 			}
-			// cerr<<"I am here now"<<endl;
 			if(this->board[currRow][currCol].size()!=0)
 				this->board[currRow][currCol].insert(this->board[currRow][currCol].end(),toAdd.begin(),toAdd.end());
 			else{
@@ -218,8 +214,6 @@ void Board::makeMove(int currentPiece, string move)
 					this->board[currRow][currCol].push_back(toAdd[k]);
 				}				
 			}
-
-			// cerr<<"I am here as well"<<endl;
 			prevSquare = nextSquare;	
 			count -= nextCount;
 		}	
@@ -359,113 +353,96 @@ vector<string> Board::getMove(int direction,int i, int j, int height, bool isTop
 	}	
 }
 
-
-int Board::evaluate()
+int Board::evaluate(int playerNo)
 {
-	return 1;
-}
-
-
-struct Node
-{
-	Node** children;
-	int no_of_children;
-	int value;
-
-	void deleteNode();
-};
-
-
-void Node::deleteNode()
-{
-	for (int i = 0; i != this->no_of_children; ++i)
-		this->children[i]->deleteNode();
-	delete [] this->children;
-	delete this;
-}
-
-class Tree{
-
-public:
-	Node* tree;
-	int bestMove;
-
-	Tree(Board board, int playerNo)
-	{
-		tree = makeTree(board,0,playerNo);
-		bestMove = -1;
-	}
-	Node* makeTree(Board board, int depth, int playerNo);
-	void deleteTree();
-	int minimax(Node* root, int depth, bool maxNode, int alpha, int beta);
-};
-
-Node* Tree::makeTree(Board board, int depth, int playerNo)
-{
-	Node* node = new Node();
-	vector<string> validMoves = board.getValidMoves(playerNo);
-	node -> no_of_children = validMoves.size();
-	node -> value = board.evaluate();
-	if (depth > 0 && node->no_of_children > 0)
-	{
-		node -> children = new Node* [node->no_of_children];
-		for (int i = 0; i != node->no_of_children; ++i){
-			//Board boardTemp;
-			board.makeMove(playerNo,validMoves[i]);
-			node -> children[i] = this->makeTree(board, depth - 1,1-playerNo);
+	cerr << "Yo\n";
+	int score = 0;
+	for (int i=0; i<this->dimension; i++){
+		for (int j=0; j<this->dimension; j++){
+			vector<string> v = this->board[i][j];
+			if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
+				if (v.back()[2]=='F')
+					score++;
+				else if (v.back()[2]=='C'){
+					for (int k=0; k<v.size(); k++){
+						if (v[k][0] == char('0'+(playerNo+1)))
+							score++;
+					}
+				}
+				else
+					continue;
+			}
 		}
 	}
-	else
-	{
-		node -> children = NULL;
+	return score;
+	cerr << "Yo1\n";
+	// return 1;
+}
+
+int Board::minimax(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo, int d)
+{
+	///Assume depth of 4
+	if (depth == d){
+		return (board1.evaluate(playerNo));
 	}
-	return node;
-}
-
-void Tree::deleteTree()
-{
-	for (int i = 0; i != this->tree->no_of_children; ++i)
-		this->tree->children[i]->deleteNode();
-	delete [] this->tree->children;
-}
-
-int Tree::minimax(Node* root, int depth, bool maxNode, int alpha, int beta)
-{
-	///Assume depth of 3
-	if (depth == 3)
-		return (root -> value);
-
+	// this->printBoard(); 
+	vector<string> validMoves = board1.getValidMoves(playerNo);
+	// cerr << "Here " << depth << " " << validMoves.size() << endl;
 	if (maxNode)
 	{
+		// cerr << "Here1" << validMoves.size();
 		int best = INT_MIN;
-		for (int i=0; i < (root -> no_of_children); i++)
+		for (int i=0; i < validMoves.size(); i++)
 		{
-			int value = minimax(tree->children[i], depth+1, false, alpha, beta);
-			this->bestMove = i;
-			best = 	max(best, value);
+			Board boardTemp(board1) ;
+			boardTemp.makeMove(playerNo,validMoves[i]);
+			int value = minimax(boardTemp, depth+1, false, alpha, beta, 1-playerNo,d);
+			if (best < value){
+				this->bestMove = i;
+				best = value;
+			}
 			alpha = std::max(alpha, best);
 
-			if (beta <= alpha)
+			if (beta <= alpha){
+				// cerr << "kl";
 				break;
+			}
 		}
 		return best;
 	}
 	else
 	{
 		int best = INT_MAX;
-
-		for (int i=0; i< (root->no_of_children); i++)
+		// cerr << "Here-1" << validMoves.size();
+		for (int i=0; i< validMoves.size(); i++)
 		{
-			int value = minimax(root -> children[i], depth+1, true, alpha, beta);
-			this->bestMove = i;
-			best = std::min(best, value);
+			Board boardTemp(board1) ;
+			boardTemp.makeMove(playerNo,validMoves[i]);
+			int value = minimax(boardTemp, depth+1, true, alpha, beta,1-playerNo,d);
+			if (best > value){
+				this->bestMove = i;
+				best = value;
+			}
 			beta = std::min(beta, best);
 
-			if (beta <= alpha)
+			if (beta <= alpha){
+				// cerr << "LK";
 				break;
+			}
 		}
 		return best;
 	}
+}
+
+int Board::minimax_iter(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo){
+	int max = INT_MIN;
+	for (int i=1; i<=4; i++){
+		int n = this->minimax(board1, depth, maxNode, alpha, beta, playerNo, i);
+		if (this->bestMove > max){
+			max = this->bestMove;
+		}
+	}
+	return max;
 }
 
 class Game{
@@ -488,7 +465,7 @@ public:
 	Game(int n)
 	{
 		this->dimension = n;
-		this->	totSquares = n*n;
+		this->totSquares = n*n;
 		this->currTurnNo = 0;
 		this->maxNoOfMovablePieces = this->dimension;
 		this->maxUp = this->dimension;
@@ -518,23 +495,31 @@ string Game::getBestMove(){
 	int currentPiece;
 	if(this->currTurnNo==0)
 		this->noOfMoves+=1;
-	if(this->noOfMoves!=1)
+	if(this->noOfMoves!=1){
 		currentPiece = this->currTurnNo;
-	else
+		// int highestValue = this->board.minimax(this->board, 0, true, INT_MIN, INT_MAX,currentPiece);
+		// int bestMoveIndex = this->board.bestMove;
+		int bestMoveIndex = this->board.minimax_iter(this->board, 0, true, INT_MIN, INT_MAX,currentPiece);
+		vector<string> v = this->board.getValidMoves(currentPiece);
+		cerr<<"ALL VALID MOVES!!!!!: ";
+		print(v);
+		cerr << endl;
+		string bestMove = v[bestMoveIndex];
+		return bestMove;
+	}
+	else{
 		currentPiece = 1 - this->currTurnNo;
-	// Tree* minmaxTree = new Tree(this->board, currentPiece);
-	// int highestValue = minmaxTree -> minimax(minmaxTree->tree, 0, true, INT_MIN, INT_MAX);
-	// int bestMoveIndex = minmaxTree -> bestMove;
-	// cerr<<"ALL nkbkk: ";
-	vector<string> v = this->board.getValidMoves(currentPiece);
-	cerr<<"ALL VALID MOVES!!!!!!!!!!!!!!!!: ";
-	print(v);
-	cerr << endl;
-	int bestMoveIndex = rand()%v.size();
-	string bestMove = v[bestMoveIndex];
-	// minmaxTree -> deleteTree();
-	// delete minmaxTree;
-	return bestMove;
+		// this->noOfMoves--;
+		if (this->board.board[0][0].empty()){
+			string bestMove = "Fa1";
+			return bestMove;
+		}
+		else{
+			string bestMove = "Fa" ;
+			bestMove += std::to_string(this->dimension);
+			return bestMove;
+		}
+	}
 }
 
 void Game::makeMove(string move)
@@ -546,7 +531,6 @@ void Game::makeMove(string move)
 		currentPiece = this->currTurnNo;
 	else
 		currentPiece = 1 - this->currTurnNo;
-
 	this->board.makeMove(currentPiece, move);
 	this->currTurnNo = 1 - this->currTurnNo;
 }
