@@ -61,14 +61,26 @@ public:
 		**board = **obj.board;
 		listOfPlayers = obj.listOfPlayers;
 	}
-	Board(int n){
-		this->dimension = n;
-		//Default as 5*5
-		listOfPlayers.push_back(Player(21,1));
-		listOfPlayers.push_back(Player(21,1)); 
+	Board(const Board &obj)
+	{	
+		dimension = obj.dimension;
 		board = new vector<string>*[dimension];
 		for(int i=0;i<dimension;i++)
+		{
 			board[i] = new vector<string>[dimension];
+			for(int j=0;j<dimension;j++)
+			{
+				board[i][j] = obj.board[i][j];
+			}
+		}
+		listOfPlayers = obj.listOfPlayers;
+	}
+	~Board(void){
+		for (int i=0; i<dimension; i++)
+    		delete[] board[i];
+
+		delete[] board;
+		// cerr << "Delete mem ";
 	}
 	~Board()
 	{
@@ -494,7 +506,7 @@ class Game{
 	char maxRight;
 	int noOfMoves;
 	Board board;
-
+	
 public:
 	Game()
 	{
