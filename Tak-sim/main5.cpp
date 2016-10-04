@@ -52,15 +52,6 @@ public:
 	Board(){
 
 	}
-	Board(const Board &obj)
-	{	
-		dimension = obj.dimension;
-		board = new vector<string>*[dimension];
-		for(int i=0;i<dimension;i++)
-			board[i] = new vector<string>[dimension];
-		**board = **obj.board;
-		listOfPlayers = obj.listOfPlayers;
-	}
 	Board(int n){
 		this->dimension = n;
 		bestMove = 0;
@@ -92,13 +83,7 @@ public:
 		delete[] board;
 		// cerr << "Delete mem ";
 	}
-	~Board()
-	{
-		for (int i=0; i<dimension; i++)
-    		delete[] board[i];
 
-		delete[] board;
-	}
 	void makeMove(int playerNo, string move);
 	int squareToNum(string sqStr);
 	int evaluate(int playerNo);
@@ -159,7 +144,7 @@ void Board::makeMove(int currentPiece, string move)
 		int isPossible = this->squareToNum(move.substr(1));
 		if(isPossible==-1)
 		{
-			cerr<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
+			cout<<"Incompatible Data!, Returning form Board::makeMove"<<endl;
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
@@ -189,7 +174,7 @@ void Board::makeMove(int currentPiece, string move)
 		int isPossible = this->squareToNum(move.substr(1,2));
 		if(isPossible==-1)
 		{
-			cerr<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
+			cout<<"Incompatible Data!, Returning form Board::makeMove, isdigit branch"<<endl;
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
@@ -448,62 +433,6 @@ int Board::minimax(Board board1, int depth, bool maxNode, int alpha, int beta, i
 		return best;
 	}
 }
-
-int Board::minimax(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo, int d)
-{
-	///Assume depth of 4
-	if (depth == d){
-		return (board1.evaluate(playerNo));
-	}
-	// this->printBoard(); 
-	vector<string> validMoves = board1.getValidMoves(playerNo);
-	// cerr << "Here " << depth << " " << validMoves.size() << endl;
-	if (maxNode)
-	{
-		// cerr << "Here1" << validMoves.size();
-		int best = INT_MIN;
-		for (int i=0; i < validMoves.size(); i++)
-		{
-			Board boardTemp(board1) ;
-			boardTemp.makeMove(playerNo,validMoves[i]);
-			int value = minimax(boardTemp, depth+1, false, alpha, beta, 1-playerNo,d);
-			if (best < value){
-				this->bestMove = i;
-				best = value;
-			}
-			alpha = std::max(alpha, best);
-
-			if (beta <= alpha){
-				// cerr << "kl";
-				break;
-			}
-		}
-		return best;
-	}
-	else
-	{
-		int best = INT_MAX;
-		// cerr << "Here-1" << validMoves.size();
-		for (int i=0; i< validMoves.size(); i++)
-		{
-			Board boardTemp(board1) ;
-			boardTemp.makeMove(playerNo,validMoves[i]);
-			int value = minimax(boardTemp, depth+1, true, alpha, beta,1-playerNo,d);
-			if (best > value){
-				this->bestMove = i;
-				best = value;
-			}
-			beta = std::min(beta, best);
-
-			if (beta <= alpha){
-				// cerr << "LK";
-				break;
-			}
-		}
-		return best;
-	}
-}
-
 
 int Board::minimax_iter(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo){
 	int max = INT_MIN;

@@ -213,7 +213,13 @@ void Board::makeMove(int currentPiece, string move)
 			int currCol = (nextSquare%dimension==0?dimension-1:nextSquare%dimension-1);
 			int lastIndex = this->board[currRow][currCol].size()-1;
 			if( (this->board[currRow][currCol].size() >  0) and (this->board[currRow][currCol][lastIndex][1]=='S'))
-				this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+' '+'F';
+				{
+					string s="";
+					s += this->board[currRow][currCol][lastIndex][0];
+					s += " ";
+					s += 'F';
+					this->board[currRow][currCol][lastIndex] = s;
+				}
 			vector<string> initVec = this->board[row][col];
 			vector<string> toAdd;
 			int size = initVec.size();
@@ -448,62 +454,6 @@ int Board::minimax(Board board1, int depth, bool maxNode, int alpha, int beta, i
 		return best;
 	}
 }
-
-int Board::minimax(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo, int d)
-{
-	///Assume depth of 4
-	if (depth == d){
-		return (board1.evaluate(playerNo));
-	}
-	// this->printBoard(); 
-	vector<string> validMoves = board1.getValidMoves(playerNo);
-	// cerr << "Here " << depth << " " << validMoves.size() << endl;
-	if (maxNode)
-	{
-		// cerr << "Here1" << validMoves.size();
-		int best = INT_MIN;
-		for (int i=0; i < validMoves.size(); i++)
-		{
-			Board boardTemp(board1) ;
-			boardTemp.makeMove(playerNo,validMoves[i]);
-			int value = minimax(boardTemp, depth+1, false, alpha, beta, 1-playerNo,d);
-			if (best < value){
-				this->bestMove = i;
-				best = value;
-			}
-			alpha = std::max(alpha, best);
-
-			if (beta <= alpha){
-				// cerr << "kl";
-				break;
-			}
-		}
-		return best;
-	}
-	else
-	{
-		int best = INT_MAX;
-		// cerr << "Here-1" << validMoves.size();
-		for (int i=0; i< validMoves.size(); i++)
-		{
-			Board boardTemp(board1) ;
-			boardTemp.makeMove(playerNo,validMoves[i]);
-			int value = minimax(boardTemp, depth+1, true, alpha, beta,1-playerNo,d);
-			if (best > value){
-				this->bestMove = i;
-				best = value;
-			}
-			beta = std::min(beta, best);
-
-			if (beta <= alpha){
-				// cerr << "LK";
-				break;
-			}
-		}
-		return best;
-	}
-}
-
 
 int Board::minimax_iter(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo){
 	int max = INT_MIN;
