@@ -759,13 +759,7 @@ int Board::evaluate(int playerNo)
 					}
 				}
 				else if (v.back()[2]=='S')
-					{
-						// score -= weightForWall;
-						if(finalThreatWeight<((this->dimension-1)*8))
-							score-= (finalThreatWeight!=0?100:weightForWall)asdasdasd;
-						else
-							score += finalThreatWeight*10;
-					}
+					score -= weightForWall;
 				else
 					continue;
 			}
@@ -777,9 +771,7 @@ int Board::evaluate(int playerNo)
 					//}
 				}
 				else if (v.back()[2]=='S')
-				{
 					score += weightForWall;
-				}
 				else
 					continue;
 			}

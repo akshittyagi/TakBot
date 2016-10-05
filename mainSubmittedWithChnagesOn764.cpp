@@ -739,7 +739,7 @@ int Board::evaluate(int playerNo)
 						else
 							score += finalThreatWeight;
 
-				//		//cerr<<"score: "<<score<<endl;
+				//		//cerr<<"scorsse: "<<score<<endl;
 					}
 					else
 					{
@@ -758,7 +758,7 @@ int Board::evaluate(int playerNo)
 								score+=weightForStackExternal*countSelf;
 					}
 				}
-				else if (v.back()[2]=='S')
+				else sif (v.back()[2]=='S')
 					{
 						// score -= weightForWall;
 						if(finalThreatWeight<((this->dimension-1)*8))

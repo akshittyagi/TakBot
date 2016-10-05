@@ -655,7 +655,7 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 	}
 
 	if( (max>=(this->dimension/2)+2) and (jMax-jMin>=this->dimension/2 or iMax-iMin>=this->dimension/2) )
-		score = max*weightForThreat;
+		score = max*weightForThreat*(jMax-jMin + iMax-iMin);
 
 
 	return score;
@@ -739,7 +739,7 @@ int Board::evaluate(int playerNo)
 						else
 							score += finalThreatWeight;
 
-				//		//cerr<<"score: "<<score<<endl;
+				//		//cerr<<"scorsse: "<<score<<endl;
 					}
 					else
 					{
@@ -761,10 +761,10 @@ int Board::evaluate(int playerNo)
 				else if (v.back()[2]=='S')
 					{
 						// score -= weightForWall;
-						if(finalThreatWeight<((this->dimension-1)*8))
-							score-= (finalThreatWeight!=0?100:weightForWall)asdasdasd;
+						if(finalThreatWeight<((this->dimension-1)*5))
+							score-= (finalThreatWeight!=0?100:weightForWall);
 						else
-							score += finalThreatWeight*10;
+							score += (finalThreatWeight/5)*100;
 					}
 				else
 					continue;
