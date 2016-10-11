@@ -24,6 +24,31 @@ void split(const string &s, char delim, vector<string> &elems)
     }
 }
 
+bool validMove(string move)
+{
+	if(isalpha(move[0]))
+	{
+		if(move.length()!=3)
+			return false;
+		if(!(move[0]=='F' or move[0]=='C' or move[0]=='S'))
+			return false;
+		if(!isalpha(move[1]))
+			return false;
+		if(!isdigit(move[2]))
+			return false;
+
+		return true;
+	}
+	else if(isdigit(move[0]))
+	{
+		if( isalpha(move[1]) and isdigit(move[2]) )
+		{
+			if( (move[3]=='+' or move[3]=='<' or move[3]=='>' or move[3]=='-') )
+				return true;
+		}
+		return false;
+	}
+}
 // void print(vector<string> elems)
 // {
 // 	for(int i=0;i<elems.size();i++)
@@ -406,8 +431,8 @@ void Board::makeMove(int currentPiece, string move)
 }
 
 vector<string> Board::getValidMoves(int currentPiece){
-	vector<string> v = this->getValidAdds(currentPiece);
-	vector<string> v1 = this->getValidStackMoves(currentPiece);
+	vector<string> v1 = this->getValidAdds(currentPiece);
+	vector<string> v = this->getValidStackMoves(currentPiece);
 	if (v.empty()){
 		return v1;
 	}
@@ -883,7 +908,8 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 			alpha = std::max(alpha, best);
 
 			if (beta <= alpha){
-				// //cerr << "kl";
+				// if (depth <=2 )
+				// 	cerr << "Depth" << depth << " ";
 				break;
 			}
 		}
@@ -926,7 +952,8 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 			beta = std::min(beta, best);
 
 			if (beta <= alpha){
-				// //cerr << "LK";
+				// if (depth <=2 )
+				// 	cerr << "Depth" << depth << " ";
 				break;
 			}
 		}
@@ -1189,7 +1216,12 @@ void AIPlayer::Play()
 	{
 		//Player 2
 		string move;
-		cin >> move;
+		cin >> move; 	
+		while(!validMove(move))
+		{
+			cerr<<"Correct Input please"<<endl;
+			cin>>move;
+		}
 		this->game.makeMove(move);
 	}
 	while(true)
@@ -1202,6 +1234,15 @@ void AIPlayer::Play()
 		cout << moveChosen;
 		string move;
 		cin >> move;
+
+		if(move=="exit")
+			exit(0);
+
+		while(!validMove(move))
+		{
+			cerr<<"Correct Input please"<<endl;
+			cin>>move;
+		}
 		if(move=="")
 		{
 			////cerr<<"EXITING";
