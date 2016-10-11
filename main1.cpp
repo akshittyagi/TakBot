@@ -107,7 +107,7 @@ public:
 	vector<string> getValidStackMoves(int currentPiece);
 	vector<string> getMove(int direction,int i, int j, int height, bool isTopCapStone, string str, int count);
 	vector<int> minimax(Board board, int depth, bool maxNode, int alpha, int beta, int playerNo, int d);
-	int minimax_iter(Board board, int depth, bool maxNode, int alpha, int beta, int playerNo);
+	int minimax_iter(Board board, int depth, bool maxNode, int alpha, int beta, int playerNo, int d);
 	int centerEvaluatorDP(int playerNo,int weightForThreat);
 	vector<int> neighbours(int top);
 	bool checkRoadWin(int playerNo,string dir);
@@ -759,13 +759,7 @@ int Board::evaluate(int playerNo)
 					}
 				}
 				else if (v.back()[2]=='S')
-					{
-						// score -= weightForWall;
-						if(finalThreatWeight<((this->dimension-1)*8))
-							score-= (finalThreatWeight!=0?100:weightForWall)asdasdasd;
-						else
-							score += finalThreatWeight*10;
-					}
+					score -= weightForWall;
 				else
 					continue;
 			}
@@ -777,9 +771,7 @@ int Board::evaluate(int playerNo)
 					//}
 				}
 				else if (v.back()[2]=='S')
-				{
 					score += weightForWall;
-				}
 				else
 					continue;
 			}
@@ -877,16 +869,16 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 			Board boardTemp(board1) ;
 			boardTemp.makeMove(playerNo,validMoves[i]);
 			int value = minimax(boardTemp, depth+1, false, alpha, beta, 1-playerNo,d)[1];
-			if (value == INT_MAX){
+			if (value >= 1000){
 				bestMoveI = i;
 				best = value;
 			}
 			// b = b and (this->roadBool);
 			// if (!this->roadBool){
-				if (best < value){
-					bestMoveI = i;
-					best = value;
-				}
+			if (best < value){
+				bestMoveI = i;
+				best = value;
+			}
 			
 			alpha = std::max(alpha, best);
 
@@ -922,6 +914,10 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 			// 	this->roadBool = true;
 			// }
 			// if (!this->roadBool){
+			if (value <= -1000){
+				bestMoveI = i;
+				best = value;
+			}
 			if (best > value){
 				bestMoveI = i;
 				best = value;
@@ -1022,21 +1018,16 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 // }
 
 
-int Board::minimax_iter(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo){
+int Board::minimax_iter(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo, int i){
 	int besMove_ = 0;
 	int max = INT_MIN;
-	for (int i=1; i<=4; i+=1){
-		vector<int> n = this->minimax(board1, depth, maxNode, alpha, beta, playerNo, i);
-		if (n[1] == 1000){
-			return n[0];
-		}
-		if (n[1] > max){
-			max = n[1];
-			besMove_ = n[0];
-		}
-	}
+	vector<int> n = this->minimax(board1, depth, maxNode, alpha, beta, playerNo, 1);
+	if (n[1]>=1000)
+		return n[0];
+	n = this->minimax(board1, depth, maxNode, alpha, beta, playerNo, i);
+	return n[0];
 	////cerr << "Score : " << max << endl;
-	return besMove_;
+	// return besMove_;
 }
 
 class Game{
@@ -1098,12 +1089,24 @@ string Game::getBestMove(){
 		int beta = INT_MAX;
 		// int highestValue = this->board.minimax(this->board, 0, true, alpha, beta,currentPiece,2);
 		// int bestMoveIndex = this->board.bestMove;
-		
 		vector<string> v = this->board.getValidMoves(currentPiece);
-		int bestMoveIndex = this->board.minimax(this->board, 0, true, alpha, beta,currentPiece,4)[0];
+		// int bestMoveIndex = 0;
+		// if ((this->board.listOfPlayers[currentPiece].flatStones + this->board.listOfPlayers[currentPiece].capStones) >= 19)
+		// 	bestMoveIndex = this->board.minimax(this->board, 0, true, alpha, beta,currentPiece,2)[0];
+		// else
+		// 	bestMoveIndex = this->board.minimax(this->board, 0, true, alpha, beta,currentPiece,4)[0];
+
+		// int bestMoveIndex = this->board.minimax(this->board, 0, true, alpha, beta,currentPiece,4)[0];
 		
-		//int bestMoveIndex = this->board.minimax_iter(this->board, 0, true, alpha, beta,currentPiece);
+
+		// int bestMoveIndex = this->board.minimax_iter(this->board, 0, true, alpha, beta,currentPiece);
 		
+		int bestMoveIndex = 0;
+		// if ((this->board.listOfPlayers[currentPiece].flatStones + this->board.listOfPlayers[currentPiece].capStones) >= 19)
+		// 	bestMoveIndex = this->board.minimax_iter(this->board, 0, true, alpha, beta,currentPiece,2);
+		// else
+			bestMoveIndex = this->board.minimax_iter(this->board, 0, true, alpha, beta,currentPiece,4);
+
 		////cerr<<"ALL VALID MOVES!!!!!: ";
 		//print(v);
 		////cerr << endl;
