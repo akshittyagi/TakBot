@@ -1,9 +1,9 @@
 #!/bin/bash
 COUNTER=0
-while [  $COUNTER -lt 10 ]; do
+while [  $COUNTER -lt 100 ]; do
 	echo The counter is $COUNTER
 	num=$[COUNTER+25000]
-	timeout 10s ./learner.sh $num
+	timeout 120s ./learner.sh $num
 	#PID=`ps -eaf | grep run1.sh | grep -v grep | awk '{print $2}'`
 	#if [[ "" !=  "$PID" ]]; then
   	#	echo "killing $PID"
