@@ -13,7 +13,7 @@
 #define MIN -10000
 
 using namespace std;
-//Debugger functions 
+//Debugger functions
 void split(const string &s, char delim, vector<string> &elems)
 {
 	stringstream ss;
@@ -80,7 +80,7 @@ public:
 
 	}
 	// Board(const Board &obj)
-	// {	
+	// {
 	// 	dimension = obj.dimension;
 	// 	board = new vector<string>*[dimension];
 	// 	for(int i=0;i<dimension;i++)
@@ -94,13 +94,13 @@ public:
 		roadBool = false;
 		//Default as 5*5
 		listOfPlayers.push_back(Player(21,1));
-		listOfPlayers.push_back(Player(21,1)); 
+		listOfPlayers.push_back(Player(21,1));
 		board = new vector<string>*[dimension];
 		for(int i=0;i<dimension;i++)
 			board[i] = new vector<string>[dimension];
 	}
 	Board(const Board &obj)
-	{	
+	{
 		dimension = obj.dimension;
 		bestMove = obj.bestMove;
 		roadBool = obj.roadBool;
@@ -136,7 +136,7 @@ public:
 	int centerEvaluatorDP(int playerNo,int weightForThreat);
 	vector<int> neighbours(int top);
 	bool checkRoadWin(int playerNo,string dir);
-	bool checkRoadWin(int playerNo);		
+	bool checkRoadWin(int playerNo);
 };
 vector<int> Board::neighbours(int top)
 {
@@ -153,53 +153,53 @@ vector<int> Board::neighbours(int top)
 	{
 		ret.push_back(top-1);
 		ret.push_back(top+this->dimension);
-		return ret;	
+		return ret;
 	}
 	else if(top==this->dimension*this->dimension - this->dimension)
 	{
 		ret.push_back(top+1);
 		ret.push_back(top-this->dimension);
-		
-		return ret;	
+
+		return ret;
 	}
 	else if(top==this->dimension*this->dimension-1)
 	{
 		ret.push_back(top-1);
 		ret.push_back(top-this->dimension);
-		
-		return ret;	
+
+		return ret;
 	}
 	else if(top<this->dimension)
 	{
 		ret.push_back(top-1);
 		ret.push_back(top+1);
 		ret.push_back(top+this->dimension);
-		
-		return ret;	
+
+		return ret;
 	}
 	else if(top%this->dimension==0)
 	{
 		ret.push_back(top+1);
 		ret.push_back(top-this->dimension);
 		ret.push_back(top+this->dimension);
-		
-		return ret;	
+
+		return ret;
 	}
 	else if((top+1)%this->dimension==0)
 	{
 		ret.push_back(top-1);
 		ret.push_back(top-this->dimension);
 		ret.push_back(top+this->dimension);
-		
-		return ret;	
+
+		return ret;
 	}
 	else if(top>=this->dimension*this->dimension - this->dimension)
 	{
 		ret.push_back(top-1);
 		ret.push_back(top+1);
 		ret.push_back(top-this->dimension);
-		
-		return ret;	
+
+		return ret;
 	}
 	else
 	{
@@ -207,8 +207,8 @@ vector<int> Board::neighbours(int top)
 		ret.push_back(top+1);
 		ret.push_back(top-this->dimension);
 		ret.push_back(top+this->dimension);
-		return ret;	
-	}	
+		return ret;
+	}
 }
 bool Board::checkRoadWin(int playerNo,string dir)
 {
@@ -252,7 +252,7 @@ bool Board::checkRoadWin(int playerNo,string dir)
 		//print(dfsStack);
 		int top = dfsStack[dfsStack.size()-1];
 		dfsStack.pop_back();
-		
+
 		////cerr<<"stacksize "<<dfsStack.size()<<endl;
 		if(finalPos.find(top)!=finalPos.end())
 		{
@@ -266,7 +266,7 @@ bool Board::checkRoadWin(int playerNo,string dir)
 			// cout<<"neighbour: "<<ngbr[i]<<endl;
 			// cout<<"currRow: "<<currRow<<endl;
 			// cout<<"currCol: "<<currCol<<endl;
-			if( visited.find(ngbr[i])==visited.end()) 
+			if( visited.find(ngbr[i])==visited.end())
 			{
 			//	cout<<"BILKULFIRST"<<endl;
 				if(this->board[currRow][currCol].size()>0)
@@ -276,12 +276,12 @@ bool Board::checkRoadWin(int playerNo,string dir)
 					{
 			//			cout<<"NEXTDO"<<endl;
 						dfsStack.push_back(ngbr[i]);
-						visited.insert(ngbr[i]);	
-				
+						visited.insert(ngbr[i]);
+
 					}
 				}
 			}
-		} 	
+		}
 	}
 
 	return false;
@@ -297,7 +297,7 @@ void Board::printBoard(){
 			//cerr << " , ";
 		}
 		//cerr << endl;
-	}		
+	}
 }
 
 void Board::setDimension(int n)
@@ -305,7 +305,7 @@ void Board::setDimension(int n)
 		this->dimension = n;
 		//Default as 5*5
 		listOfPlayers.push_back(Player(21,1));
-		listOfPlayers.push_back(Player(21,1)); 
+		listOfPlayers.push_back(Player(21,1));
 		board = new vector<string>*[dimension];
 		for(int i=0;i<dimension;i++)
 			board[i] = new vector<string>[dimension];
@@ -342,7 +342,7 @@ void Board::makeMove(int currentPiece, string move)
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
-		int row = int(move.substr(1)[1])-49; 
+		int row = int(move.substr(1)[1])-49;
 		if(move[0]=='F' or move[0]=='S')
 		{
 			string s="";
@@ -372,7 +372,7 @@ void Board::makeMove(int currentPiece, string move)
 			return;
 		}
 		int col = int(move.substr(1)[0])-97;
-		int row = int(move.substr(1)[1])-49; 
+		int row = int(move.substr(1)[1])-49;
 		char direction = move[3];
 		int change;
 		if(direction=='+')
@@ -414,11 +414,11 @@ void Board::makeMove(int currentPiece, string move)
 				// this->board[currRow][currCol] = toAdd
 				for (int k=0; k<toAdd.size(); k++){
 					this->board[currRow][currCol].push_back(toAdd[k]);
-				}				
+				}
 			}
-			prevSquare = nextSquare;	
+			prevSquare = nextSquare;
 			count -= nextCount;
-		}	
+		}
 		count = int(move[0])-48;
 		int i = count;
 		while(i--)
@@ -488,7 +488,7 @@ vector<string> Board::getValidStackMoves(int currentPiece){
 				if (this->board[i][j].back()[2]=='C')
 					isTopCapStone = true;
 				string arr[4] = {"<",">","-","+"};
-				for (int k = 0; k<4; k++){	
+				for (int k = 0; k<4; k++){
 					string st = "";
 					st += char('a'+j);
 					st += std::to_string(i+1)+arr[k];
@@ -497,7 +497,7 @@ vector<string> Board::getValidStackMoves(int currentPiece){
 						list = v1;
 					else
 						list.insert(list.end(),v1.begin(),v1.end());
-				}	
+				}
 			}
 		}
 	}
@@ -552,7 +552,7 @@ vector<string> Board::getMove(int direction,int i, int j, int height, bool isTop
 			}
 		}
 		return v;
-	}	
+	}
 }
 
 int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
@@ -572,11 +572,11 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 					values[i][j] = 1;
 					prev[i][j] = 0;
 					max = 1;
-				}	
+				}
 				else{
 					values[i][j] = 0;
 					prev[i][j] = -2;
-				}	
+				}
 			}
 			else if (i==0){
 				if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
@@ -590,11 +590,11 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 						prev[i][j] = 0;
 					else
 						prev[i][j] = -1;
-				}	
+				}
 				else{
 					values[i][j] = 0;
 					prev[i][j] = -2;
-				}	
+				}
 			}
 			else if (j==0){
 				if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
@@ -608,11 +608,11 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 						prev[i][j] = 0;
 					else
 						prev[i][j] = 1;
-				}	
+				}
 				else{
 					values[i][j] = 0;
 					prev[i][j] = -2;
-				}	
+				}
 			}
 			else{
 				if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
@@ -640,11 +640,11 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 							prev[i][j] = 0;
 						else
 							prev[i][j] = 1;
-					}	
+					}
 				}
 				else{
 					values[i][j] = 0;
-					prev[i][j] = -2;	
+					prev[i][j] = -2;
 				}
 			}
 			v.clear();
@@ -662,9 +662,9 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 			i_max--;
 		else if (prev[i_max][j_max] == 0)
 			break;
-		
+
 	}
-	
+
 	int score=0;
 	int jMax=INT_MIN,jMin=INT_MAX,iMin=INT_MAX,iMax=INT_MIN;
 	for(int i=0;i<rows.size();i++)
@@ -702,7 +702,7 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 	// for (int i = 0; i<rows.size(); i++){
 	// 	//cerr << rows[i] << "," << cols[i] << endl;
 	// }
-	
+
 }
 
 int Board::evaluate(int playerNo)
@@ -713,14 +713,14 @@ int Board::evaluate(int playerNo)
 	int weightForFlat=20;
 	int weightForCaptivesSelf=15;
 	int weightForCaptivesNSelf=5;
-	int weightForWall=2; 
+	int weightForWall=2;
 	int weightForStackInternal=25;
 	int weightForStackExternal=10;
 	int weightForThreat=10;
 	int weightForCap=10;
 	int selfStackingPenalty=36;
 	int score = 0;
-	
+
 	if(checkRoadWin(playerNo))
 	{
 		score+=1000;
@@ -741,10 +741,10 @@ int Board::evaluate(int playerNo)
 		{
 			vector<string> v = this->board[i][j];
 			if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
-				
+
 				if(v.size()>2 and v[v.size()-2][0]==v.back()[0])
 					score-=selfStackingPenalty;
-				
+
 				if (v.back()[2]=='F')
 				{
 					score+=weightForFlat;
@@ -753,7 +753,7 @@ int Board::evaluate(int playerNo)
 							score+=weightForStackInternal;
 						else if( ( (i==0 or i==dim-1) and (j>=0 and j<=dim-1) ) or ( (j==0 or j==dim-1) and (i>=1 and i<=dim-2) ) )
 							score+=weightForStackExternal;
-				} 
+				}
 				else if (v.back()[2]=='C'){
 					int countSelf=0;
 					if(v.size()>=2)
@@ -774,7 +774,7 @@ int Board::evaluate(int playerNo)
 								score+=weightForCaptivesSelf;
 								countSelf++;
 							}
-						}				
+						}
 
 						if(v.size()>1)
 							if(not( ( (i==0 or i==dim-1) and (j>=0 and j<=dim-1) ) or ( (j==0 or j==dim-1) and (i>=1 and i<=dim-2) ) ))
@@ -800,7 +800,7 @@ int Board::evaluate(int playerNo)
 				else
 					continue;
 			}
-			
+
 
 
 			v.clear();
@@ -904,7 +904,7 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 				bestMoveI = i;
 				best = value;
 			}
-			
+
 			alpha = std::max(alpha, best);
 
 			if (beta <= alpha){
@@ -920,7 +920,7 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 		// 	if (depth == 0){
 		// 		this->roadBool = false;
 		// 	}
-		// 	return best;	
+		// 	return best;
 		// }
 		// else{
 		// 	this->roadBool = false;
@@ -948,7 +948,7 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 				bestMoveI = i;
 				best = value;
 			}
-			// }	
+			// }
 			beta = std::min(beta, best);
 
 			if (beta <= alpha){
@@ -1007,7 +1007,7 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 // 		// 	if (depth == 0){
 // 		// 		this->roadBool = false;
 // 		// 	}
-// 		// 	return best;	
+// 		// 	return best;
 // 		// }
 // 		// else{
 // 		// 	this->roadBool = false;
@@ -1031,7 +1031,7 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 // 					this->bestMove = i;
 // 					best = value;
 // 				}
-// 			// }	
+// 			// }
 // 			beta = std::min(beta, best);
 
 // 			if (beta <= alpha){
@@ -1049,14 +1049,16 @@ int Board::minimax_iter(Board board1, int depth, bool maxNode, int alpha, int be
 	int besMove_ = 0;
 	int max = INT_MIN;
 	vector<int> n = this->minimax(board1, depth, maxNode, alpha, beta, playerNo, 1);
-	if (n[1]>=1000)
+	if (n[1]>=1000){
+		cerr << "yo" << endl;
 		return n[0];
-	n = this->minimax(board1, depth, maxNode, alpha, beta, playerNo, i);
+	}	
+	n = this->minimax(board1, depth, maxNode, alpha, beta, playerNo, 2);
+	cerr << "Score : " << n[1] << endl;
 	return n[0];
 	////cerr << "Score : " << max << endl;
 	// return besMove_;
 }
-
 class Game{
 
 	int dimension;
@@ -1124,10 +1126,10 @@ string Game::getBestMove(){
 		// 	bestMoveIndex = this->board.minimax(this->board, 0, true, alpha, beta,currentPiece,4)[0];
 
 		// int bestMoveIndex = this->board.minimax(this->board, 0, true, alpha, beta,currentPiece,4)[0];
-		
+
 
 		// int bestMoveIndex = this->board.minimax_iter(this->board, 0, true, alpha, beta,currentPiece);
-		
+
 		int bestMoveIndex = 0;
 		// if ((this->board.listOfPlayers[currentPiece].flatStones + this->board.listOfPlayers[currentPiece].capStones) >= 19)
 		// 	bestMoveIndex = this->board.minimax_iter(this->board, 0, true, alpha, beta,currentPiece,2);
@@ -1137,7 +1139,7 @@ string Game::getBestMove(){
 		////cerr<<"ALL VALID MOVES!!!!!: ";
 		//print(v);
 		////cerr << endl;
-		string bestMove = v[bestMoveIndex];	
+		string bestMove = v[bestMoveIndex];
 		this->board.makeMove(currentPiece, bestMove);
 		this->currTurnNo = 1 - this->currTurnNo;
 		// ////cerr << "BestIndex : " << bestMoveIndex << " ValidMoves Size : " << v.size() << endl;
@@ -1158,7 +1160,7 @@ string Game::getBestMove(){
 			// this->board.centerEvaluatorDP(currentPiece);
 			return bestMove;
 		}
-		else{	
+		else{
 			string bestMove = "Fa" ;
 			bestMove += std::to_string(this->dimension);
 			this->board.makeMove(currentPiece, bestMove);
@@ -1193,11 +1195,11 @@ class AIPlayer{
 	int timeLeft;
 	int playerNo;
 	Game game;
-	
+
     public:
 		AIPlayer(string start)
 		{
-			//TODO:Initialize the params 
+			//TODO:Initialize the params
 			string data;
 			cin >> data;
 			this->playerNo = atoi(data.c_str())-1;
@@ -1216,7 +1218,7 @@ void AIPlayer::Play()
 	{
 		//Player 2
 		string move;
-		cin >> move; 	
+		cin >> move;
 		while(!validMove(move))
 		{
 			cerr<<"Correct Input please"<<endl;
@@ -1247,10 +1249,10 @@ void AIPlayer::Play()
 		{
 			////cerr<<"EXITING";
 			exit(0);
-		}	
+		}
 
-		this->game.makeMove(move); 
-	}	
+		this->game.makeMove(move);
+	}
 }
 
 int main()

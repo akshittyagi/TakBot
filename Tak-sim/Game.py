@@ -49,7 +49,8 @@ class Game:
 		self.max_right = chr(ord('a') + n - 1)
 		self.winner = {}
 		self.mode = mode
-	
+
+
 	def __str__(self):
 		'''Returns a string representation of the current
 		state of the game
@@ -82,6 +83,8 @@ class Game:
 			game_string += ' ' * (Game.CELL_WIDTH/2)
 		return game_string
 
+
+
 	def square_to_string(self, square):
 		square_string = ''
 		for i in range(len(square)):
@@ -101,6 +104,8 @@ class Game:
 		self.canvas.pack()
 		self.render_board = Board(self.n, self.canvas, self.window_height, self.window_width)
 
+	def renderer(self):
+		print ""
 	def render(self):
 		print self.__str__()
 		print '\n\n'
@@ -196,7 +201,7 @@ class Game:
 			prev_square = square
 			for i in xrange(4, len(move_string)):
 				next_count = int(move_string[i])
-				next_square = prev_square + change				
+				next_square = prev_square + change
 				if (len(self.board[next_square]) > 0) and (self.board[next_square][-1][1] == 'S'):
 					self.board[next_square][-1] = (self.board[next_square][-1][0], 'F')
 				if next_count - count == 0:
@@ -235,7 +240,7 @@ class Game:
 	def square_to_num(self,square_string):
 		''' Return -1 if square_string is invalid
 		'''
-		
+
 		if len(square_string) != 2:
 			return -1
 		if not square_string[0].isalpha() or not square_string[0].islower() or not square_string[1].isdigit():
