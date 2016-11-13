@@ -1,5 +1,0 @@
-Representation:
-	Per Square: int -> size of stack at current sq , long long -> bit representation of pieces in the current sq
-	long long: [0]*[stackrepresentation](top)
-	stackrepresentation: 01010111010101...(44 bits)
-	top:00(p1Cap),01(p1S),10(p2Cap),11(p2S) 
