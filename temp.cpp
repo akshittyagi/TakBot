@@ -4,7 +4,7 @@ public:
 	int dimension;
 	int bestMove;
 	bool roadBool;
-	vector<int> **board;
+	vector<string> **board;
 	class Player{
 	public:
 		int flatStones;
@@ -37,19 +37,19 @@ public:
 		//Default as 5*5
 		listOfPlayers.push_back(Player(21,1));
 		listOfPlayers.push_back(Player(21,1)); 
-		board = new vector<int>*[dimension];
+		board = new vector<string>*[dimension];
 		for(int i=0;i<dimension;i++)
-			board[i] = new vector<int>[dimension];
+			board[i] = new vector<string>[dimension];
 	}
 	Board(const Board &obj)
 	{	
 		dimension = obj.dimension;
 		bestMove = obj.bestMove;
 		roadBool = obj.roadBool;
-		board = new vector<int>*[dimension];
+		board = new vector<string>*[dimension];
 		for(int i=0;i<dimension;i++)
 		{
-			board[i] = new vector<int>[dimension];
+			board[i] = new vector<string>[dimension];
 			for(int j=0;j<dimension;j++)
 			{
 				board[i][j] = obj.board[i][j];
@@ -161,8 +161,8 @@ bool Board::checkRoadWin(int playerNo,string dir)
 	{
 		for(int i=0;i<this->dimension;i++)
 		{
-			vector<int> currVec = this->board[0][i];
-			if( currVec.size()>0 and currVec[currVec.size()-1]>0 and currVec[currVec.size()-1]<3 )
+			vector<string> currVec = this->board[0][i];
+			if( currVec.size()>0 and currVec[currVec.size()-1][0]==char(playerNo+49) and currVec[currVec.size()-1][2]!='S' )
 			  {
 			  	visited.insert(i);
 			  	dfsStack.push_back(i);
@@ -177,11 +177,11 @@ bool Board::checkRoadWin(int playerNo,string dir)
 			// //cerr<<"I: "<<i<<" In horizontal dir"<<endl;
 			// if(i==1)
 			// 	this->printBoard();
-			vector<int> currVec = this->board[i][0];
+			vector<string> currVec = this->board[i][0];
 			////cerr<<"currVec: "<<endl;
 			// print(currVec);
 			// //cerr<<endl;
-			if( currVec.size()>0 and currVec[currVec.size()-1]>0 and currVec[currVec.size()-1]<3 )
+			if( currVec.size()>0 and currVec[currVec.size()-1][0]==char(playerNo+49) and currVec[currVec.size()-1][2]!='S')
 			{
 				visited.insert(i*this->dimension);
 				dfsStack.push_back(i*this->dimension);
@@ -214,7 +214,7 @@ bool Board::checkRoadWin(int playerNo,string dir)
 				if(this->board[currRow][currCol].size()>0)
 				{
 			//		cout<<"PEHLIDO"<<endl;
-					if( this->board[currRow][currCol][this->board[currRow][currCol].size()-1]>0 and this->board[currRow][currCol][this->board[currRow][currCol].size()-1]<3 )
+					if( this->board[currRow][currCol][this->board[currRow][currCol].size()-1][0]==char(playerNo+49) and this->board[currRow][currCol][this->board[currRow][currCol].size()-1][2]!='S' )
 					{
 			//			cout<<"NEXTDO"<<endl;
 						dfsStack.push_back(ngbr[i]);
@@ -248,9 +248,9 @@ void Board::setDimension(int n)
 		//Default as 5*5
 		listOfPlayers.push_back(Player(21,1));
 		listOfPlayers.push_back(Player(21,1)); 
-		board = new vector<int>*[dimension];
+		board = new vector<string>*[dimension];
 		for(int i=0;i<dimension;i++)
-			board[i] = new vector<int>[dimension];
+			board[i] = new vector<string>[dimension];
 }
 int Board::squareToNum(string sqStr)
 {
@@ -275,8 +275,6 @@ void Board::makeMove(int currentPiece, string move)
 		-> Update the board the of this.Game object
 		-> Update the GameState
 	*/
-
- 		int sign=pow(-1,currentPiece);
 	if(isalpha(move[0]))
 	{
 		int isPossible = this->squareToNum(move.substr(1));
@@ -287,35 +285,27 @@ void Board::makeMove(int currentPiece, string move)
 		}
 		int col = int(move.substr(1)[0])-97;
 		int row = int(move.substr(1)[1])-49; 
-		// if(move[0]=='F' or move[0]=='S')
-		// {
-		// 	string s="";
-		// 	s += char(currentPiece+49);
-		// 	s += " ";
-		// 	s += move[0];
-		// 	this->board[row][col].push_back(s);
-		// 	this->listOfPlayers[currentPiece].flatStones-=1;
- 	// 	}
- 	// 	else if(move[0]=='C')
- 	// 	{
- 	// 		string s="";
-		// 	s += char(currentPiece+49);
-		// 	s += " ";
-		// 	s += move[0];
-		// 	this->board[row][col].push_back(s);
- 	// 		this->listOfPlayers[currentPiece].capStones -= 1;
- 	// 	}
- 		char sel = ( move[0]=='F' || move[0]=='S' ? 'c':'C' );
- 		int typ = ( sel=='C' ? sign*2 : ( move[0]=='F' ? sign*1 : sign*3 ) );
- 			this->board[row][col].push_back(typ);
-			if(sel!='C')
-				this->listOfPlayers[currentPiece].flatStones-=1;
- 			else
- 				this->listOfPlayers[currentPiece].capStones -= 1;
- 		
+		if(move[0]=='F' or move[0]=='S')
+		{
+			string s="";
+			s += char(currentPiece+49);
+			s += " ";
+			s += move[0];
+			this->board[row][col].push_back(s);
+			this->listOfPlayers[currentPiece].flatStones-=1;
+ 		}
+ 		else if(move[0]=='C')
+ 		{
+ 			string s="";
+			s += char(currentPiece+49);
+			s += " ";
+			s += move[0];
+			this->board[row][col].push_back(s);
+ 			this->listOfPlayers[currentPiece].capStones -= 1;
+ 		}
 	}
 	else if(isdigit(move[0]))
-	{//TODO:=---------------------------------
+	{
 		int count = int(move[0])-48;
 		int isPossible = this->squareToNum(move.substr(1,2));
 		if(isPossible==-1)
@@ -345,17 +335,16 @@ void Board::makeMove(int currentPiece, string move)
 			int lastIndex = this->board[currRow][currCol].size()-1;
 			// if( (this->board[currRow][currCol].size() >  0) and (this->board[currRow][currCol][lastIndex][1]=='S'))
 			// 	this->board[currRow][currCol][lastIndex] = this->board[currRow][currCol][lastIndex][0]+' '+'F';
-			if( (this->board[currRow][currCol].size() >  0) and (abs(this->board[currRow][currCol][lastIndex])==sign*3))
+			if( (this->board[currRow][currCol].size() >  0) and (this->board[currRow][currCol][lastIndex][2]=='S'))
 				{
-					// string s="";
-					// s += this->board[currRow][currCol][lastIndex][0];
-					// s += " ";
-					// s += 'F';
-					this->board[currRow][currCol][lastIndex] = sign*3;//-------------------------------------------------------
+					string s="";
+					s += this->board[currRow][currCol][lastIndex][0];
+					s += " ";
+					s += 'F';
+					this->board[currRow][currCol][lastIndex] = s;
 				}
-
-			vector<int> initVec = this->board[row][col];
-			vector<int> toAdd;
+			vector<string> initVec = this->board[row][col];
+			vector<string> toAdd;
 			int size = initVec.size();
 			for(int j = size-count;j<size-count+nextCount;j++)
 			{
@@ -384,8 +373,8 @@ void Board::makeMove(int currentPiece, string move)
 }
 
 vector<string> Board::getValidMoves(int currentPiece){
-	vector<string> v1 = this->getValidAdds(currentPiece);
-	vector<string> v  = this->getValidStackMoves(currentPiece);
+	vector<string> v = this->getValidAdds(currentPiece);
+	vector<string> v1 = this->getValidStackMoves(currentPiece);
 	if (v.empty()){
 		return v1;
 	}
@@ -428,10 +417,9 @@ vector<string> Board::getValidAdds(int currentPiece){
 }
 vector<string> Board::getValidStackMoves(int currentPiece){
 	vector<string> list;
-	int sign=(-1,currentPiece);
 	for (int i=0; i<this->dimension; i++){
 		for (int j=0; j<this->dimension; j++){
-			if (this->board[i][j].empty() || this->board[i][j].back()*sign>0 ){   /////assuming the pieces are placed as (F/S/C)(0/1)
+			if (this->board[i][j].empty() || this->board[i][j].back()[0]!=char('0'+(currentPiece+1))){   /////assuming the pieces are placed as (F/S/C)(0/1)
 				continue;
 			}
 			else{
@@ -439,7 +427,7 @@ vector<string> Board::getValidStackMoves(int currentPiece){
 				bool isTopCapStone = false;
 				if (heightStack > this->dimension)
 					heightStack = this->dimension;
-				if (abs(this->board[i][j].back())==2)
+				if (this->board[i][j].back()[2]=='C')
 					isTopCapStone = true;
 				string arr[4] = {"<",">","-","+"};
 				for (int k = 0; k<4; k++){	
@@ -475,10 +463,10 @@ vector<string> Board::getMove(int direction,int i, int j, int height, bool isTop
 	}
 	int nextRow = row[direction];
 	int nextCol = col[direction];
-	if (!this->board[nextRow][nextCol].empty() && ( abs(this->board[nextRow][nextCol].back()) == 2 )){
+	if (!this->board[nextRow][nextCol].empty() && (this->board[nextRow][nextCol].back()[2] == 'C')){
 		return v;
 	}
-	else if (!this->board[nextRow][nextCol].empty() && ( abs(this->board[nextRow][nextCol].back()) == 2 )){
+	else if (!this->board[nextRow][nextCol].empty() && (this->board[nextRow][nextCol].back()[2] == 'S')){
 		if (isTopCapStone){
 			v.push_back(std::to_string(count+1)+str+"1");
 			return v;
@@ -516,14 +504,13 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 	int max=0;
 	int i_max = 0;
 	int j_max = 0;
-	int sign=pow(-1,playerNo);
 	for(int i=0;i<this->dimension;i++)
 	{
 		for(int j=0;j<this->dimension;j++)
 		{
-			vector<int> v = this->board[i][j];
+			vector<string> v = this->board[i][j];
 			if (i==0 && j==0){
-				if (!v.empty() && v.back()*sign>0 ){
+				if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
 					values[i][j] = 1;
 					prev[i][j] = 0;
 					max = 1;
@@ -534,7 +521,7 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 				}	
 			}
 			else if (i==0){
-				if (!v.empty() && v.back()*sign>0 ){
+				if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
 					values[i][j] = 1 + values[i][j-1];
 					if (values[i][j] > max){
 						max = values[i][j];
@@ -552,7 +539,7 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 				}	
 			}
 			else if (j==0){
-				if (!v.empty() && v.back()*sign>0 ){
+				if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
 					values[i][j] = 1 + values[i-1][j];
 					if (values[i][j] > max){
 						max = values[i][j];
@@ -570,7 +557,7 @@ int Board::centerEvaluatorDP(int playerNo,int weightForThreat)
 				}	
 			}
 			else{
-				if (!v.empty() && v.back()*sign>0 ){
+				if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
 					if (values[i][j-1] > values[i-1][j]){
 						values[i][j] = 1 + values[i][j-1];
 						if (values[i][j] > max){
@@ -689,19 +676,18 @@ int Board::evaluate(int playerNo)
 	int finalThreatWeight = centerEvaluatorDP(1-playerNo,weightForThreat);
 	score+=centerEvaluatorDP(playerNo,weightForThreat);
 	score-=finalThreatWeight;
-	int sign=pow(-1,playerNo);
 
 	int dim = this->dimension;
 	for (int i=0; i<this->dimension; i++){
 		for (int j=0; j<this->dimension; j++)
 		{
-			vector<int> v = this->board[i][j];
-			if (!v.empty() && v.back()*sign>0 ){
+			vector<string> v = this->board[i][j];
+			if (!v.empty() && v.back()[0]==char('0'+(playerNo+1))){
 				
-				if(v.size()>2 and v[v.size()-2]*v.back()>0)
+				if(v.size()>2 and v[v.size()-2][0]==v.back()[0])
 					score-=selfStackingPenalty;
 				
-				if (abs(v.back())==1)
+				if (v.back()[2]=='F')
 				{
 					score+=weightForFlat;
 					if(v.size()>1)
@@ -710,7 +696,7 @@ int Board::evaluate(int playerNo)
 						else if( ( (i==0 or i==dim-1) and (j>=0 and j<=dim-1) ) or ( (j==0 or j==dim-1) and (i>=1 and i<=dim-2) ) )
 							score+=weightForStackExternal;
 				} 
-				else if (abs(v.back())==2){
+				else if (v.back()[2]=='C'){
 					int countSelf=0;
 					if(v.size()>=2)
 					{
@@ -725,7 +711,7 @@ int Board::evaluate(int playerNo)
 					else
 					{
 						for (int k=0; k<v.size(); k++){
-							if (v[k]*sign>0)
+							if (v[k][0] == char('0'+(playerNo+1)))
 							{
 								score+=weightForCaptivesSelf;
 								countSelf++;
@@ -739,19 +725,19 @@ int Board::evaluate(int playerNo)
 								score+=weightForStackExternal*countSelf;
 					}
 				}
-				else if (abs(v.back())==3)
+				else if (v.back()[2]=='S')
 					score -= weightForWall;
 				else
 					continue;
 			}
-			if (!v.empty() && v.back()*sign<0 ){
-				if (abs(v.back())==2){
+			if (!v.empty() && v.back()[0]==char('0'+(2-playerNo))){
+				if (v.back()[2]=='C'){
 					//for (int k=0; k<v.size(); k++){
 						//if (v[k][0] == char('0'+(playerNo+1)))
 						score-= v.size()*weightForCaptivesNSelf;
 					//}
 				}
-				else if (abs(v.back())==3)
+				else if (v.back()[2]=='S')
 					score += weightForWall;
 				else
 					continue;
@@ -768,6 +754,61 @@ int Board::evaluate(int playerNo)
 }
 
 
+// int Board::minimax(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo, int d)
+// {
+// 	///Assume depth of 4
+// 	if (depth == d){
+// 		int best = board1.evaluate(playerNo);
+// 		return (best);
+// 	}
+// 	vector<string> validMoves = board1.getValidMoves(playerNo);
+// 	if (maxNode)
+// 	{
+// 		// //cerr << "Here1" << validMoves.size();
+// 		int best = INT_MIN;
+// 		for (int i=0; i < validMoves.size(); i++)
+// 		{
+// 			Board boardTemp(board1) ;
+// 			boardTemp.makeMove(playerNo,validMoves[i]);
+// 			int value = minimax(boardTemp, depth+1, false, alpha, beta, 1-playerNo,d);
+// 			if (best < value){
+// 				this->bestMove = i;
+// 				best = value;
+// 			}
+// 			alpha = std::max(alpha, best);
+
+// 			if (beta <= alpha){
+// 				// //cerr << "kl";
+// 				break;
+// 			}
+// 		}
+// 		return best;
+// 	}
+// 	else
+// 	{
+// 		int best = INT_MAX;
+// 		// //cerr << "Here-1" << validMoves.size();
+// 		for (int i=0; i< validMoves.size(); i++)
+// 		{
+// 			Board boardTemp(board1) ;
+// 			boardTemp.makeMove(playerNo,validMoves[i]);
+// 			int value = minimax(boardTemp, depth+1, true, alpha, beta,1-playerNo,d);
+// 			if (best > value){
+// 				this->bestMove = i;
+// 				best = value;
+// 			}
+// 			beta = std::min(beta, best);
+
+// 			if (beta <= alpha){
+// 				// //cerr << "LK";
+// 				break;
+// 			}
+// 		}
+// 		return best;
+// 	}
+// }
+
+///////////////Correct
 
 vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo, int d)
 {	///// v[0] = bestIndex   v[1] = bestvalue
@@ -809,8 +850,7 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 			alpha = std::max(alpha, best);
 
 			if (beta <= alpha){
-				// if (depth <=2 )
-				// 	cerr << "Depth" << depth << " ";
+				// //cerr << "kl";
 				break;
 			}
 		}
@@ -853,8 +893,7 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 			beta = std::min(beta, best);
 
 			if (beta <= alpha){
-				// if (depth <=2 )
-				// 	cerr << "Depth" << depth << " ";
+				// //cerr << "LK";
 				break;
 			}
 		}
@@ -864,6 +903,87 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 	}
 	//validMoves.clear();
 }
+// int Board::minimax(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo, int d)
+// {
+// 	///Assume depth of 4
+// 	if (depth == d){
+// 		int best = 0;
+// 		if (depth%2==1)
+// 			best = board1.evaluate(1-playerNo);
+// 		else
+// 			best = board1.evaluate(playerNo);
+// 		return (best);
+// 	}
+// 	vector<string> validMoves = board1.getValidMoves(playerNo);
+// 	if (maxNode)
+// 	{
+// 		// //cerr << "Here1" << validMoves.size();
+// 		int best = INT_MIN;
+// 		bool b = true;
+// 		for (int i=0; i < validMoves.size(); i++)
+// 		{
+// 			Board boardTemp(board1) ;
+// 			boardTemp.makeMove(playerNo,validMoves[i]);
+// 			int value = minimax(boardTemp, depth+1, false, alpha, beta, 1-playerNo,d);
+// 			if (value == INT_MAX){
+// 				this->bestMove = i;
+// 				best = value;
+// 			}
+// 			b = b and (this->roadBool);
+// 			if (!this->roadBool){
+// 				if (best < value){
+// 					this->bestMove = i;
+// 					best = value;
+// 				}
+// 			}
+// 			alpha = std::max(alpha, best);
+
+// 			if (beta <= alpha){
+// 				// //cerr << "kl";
+// 				break;
+// 			}
+// 		}
+// 		// if (b){
+// 		// 	if (depth == 0){
+// 		// 		this->roadBool = false;
+// 		// 	}
+// 		// 	return best;	
+// 		// }
+// 		// else{
+// 		// 	this->roadBool = false;
+// 		// 	return best;
+// 		// }
+// 	}
+// 	else
+// 	{
+// 		int best = INT_MAX;
+// 		// //cerr << "Here-1" << validMoves.size();
+// 		for (int i=0; i< validMoves.size(); i++)
+// 		{
+// 			Board boardTemp(board1) ;
+// 			boardTemp.makeMove(playerNo,validMoves[i]);
+// 			int value = minimax(boardTemp, depth+1, true, alpha, beta,1-playerNo,d);
+// 			// if (value == -1000){
+// 			// 	this->roadBool = true;
+// 			// }
+// 			// if (!this->roadBool){
+// 				if (best > value){
+// 					this->bestMove = i;
+// 					best = value;
+// 				}
+// 			// }	
+// 			beta = std::min(beta, best);
+
+// 			if (beta <= alpha){
+// 				// //cerr << "LK";
+// 				break;
+// 			}
+// 		}
+// 		return best;
+// 	}
+// 	//validMoves.clear();
+// }
+
 
 int Board::minimax_iter(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo, int i){
 	int besMove_ = 0;
@@ -872,7 +992,13 @@ int Board::minimax_iter(Board board1, int depth, bool maxNode, int alpha, int be
 	if (n[1]>=1000)
 		return n[0];
 	n = this->minimax(board1, depth, maxNode, alpha, beta, playerNo, i);
-	return n[0];
+	vector<int> n1 = this->minimax(board1, depth, maxNode, alpha, beta, playerNo, 2);
+	// cerr << "Score : " << n[1] << endl;
+	// cerr << "Score1 : " << n1[1] << endl;
+	if (n[1] >= n1[1])
+		return n[0];
+	else
+		return n1[0];
 	////cerr << "Score : " << max << endl;
 	// return besMove_;
 }

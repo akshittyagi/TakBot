@@ -843,6 +843,8 @@ int Board::evaluate(int playerNo)
 
 ///////////////Correct
 
+
+
 vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int beta, int playerNo, int d)
 {	///// v[0] = bestIndex   v[1] = bestvalue
 	///Assume depth of 4
@@ -930,6 +932,7 @@ vector<int> Board::minimax(Board board1, int depth, bool maxNode, int alpha, int
 				break;
 			}
 		}
+
 		v.push_back(bestMoveI);
 		v.push_back(best);
 		return v;
