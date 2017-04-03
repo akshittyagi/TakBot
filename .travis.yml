@@ -1,0 +1,11 @@
+language: cpp
+compiler:
+- gcc
+os:
+- linux
+ruby: 2.2.0
+script: make
+branches:
+  only:
+  - master
+  - "/^v\\d+\\./"
