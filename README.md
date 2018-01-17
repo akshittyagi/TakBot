@@ -21,5 +21,5 @@ TakBot uses a minimax tree to make decisions on the moves it wants to make in a 
 We have made the TakBot play against itself in multiple different configurations, similar to what AlphaGo does to train without a human at the other end. It learns the features and their weights in the utility function thus getting better at rating these future states heuristically.
 
 ## Future Work
-We plan on using a augmented Monte Carlo-* Mininax Search in the future as is done <a href="https://repository.tudelft.nl/islandora/object/uuid:72ae1c45-5b8f-4650-9b7e-e02c45dec4a4/datastream/OBJ/download.>here</a>
+We plan on using a augmented Monte Carlo-* Mininax Search in the future as is done <a href="https://repository.tudelft.nl/islandora/object/uuid:72ae1c45-5b8f-4650-9b7e-e02c45dec4a4/datastream/OBJ/download.">here</a>
   
